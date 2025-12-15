@@ -1,0 +1,22 @@
+{
+  "feature_cols": [
+    "Luas_Tanah_ha",
+    "Urea_per_ha",
+    "NPK_per_ha",
+    "Organik_per_ha"
+  ],
+  "n_clusters": 10,
+  "characteristics": {
+    "0": "Cluster 0: Petani lahan kecil (<0.5 ha), intensitas pupuk sedang, pola penggunaan stabil",
+    "1": "Cluster 1: Petani lahan sedang (0.5-1.5 ha), intensitas pupuk tinggi, pola penggunaan stabil",
+    "2": "Cluster 2: Petani lahan sedang (0.5-1.5 ha), intensitas pupuk sedang",
+    "3": "Cluster 3: Petani lahan kecil (<0.5 ha), intensitas pupuk rendah, banyak anomali (100%)",
+    "4": "Cluster 4: Petani lahan kecil (<0.5 ha), intensitas pupuk tinggi, banyak anomali (100%)",
+    "5": "Cluster 5: Petani lahan kecil (<0.5 ha), intensitas pupuk sedang, banyak anomali (100%)",
+    "6": "Cluster 6: Petani lahan besar (>1.5 ha), intensitas pupuk sedang, pola penggunaan stabil",
+    "7": "Cluster 7: Petani lahan sedang (0.5-1.5 ha), intensitas pupuk tinggi, banyak anomali (100%)",
+    "8": "Cluster 8: Petani lahan kecil (<0.5 ha), intensitas pupuk sedang, pola penggunaan stabil",
+    "9": "Cluster 9: Petani lahan kecil (<0.5 ha), intensitas pupuk tinggi, pola penggunaan stabil"
+  },
+  "standards_enabled": true
+}

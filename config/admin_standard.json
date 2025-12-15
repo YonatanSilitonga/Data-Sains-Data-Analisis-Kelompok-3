@@ -1,0 +1,57 @@
+{
+  "Padi": {
+    "Urea_MT1": 60,
+    "NPK_MT1": 40,
+    "Organik_MT1": 30,
+    "Urea_MT2": 60,
+    "NPK_MT2": 40,
+    "Organik_MT2": 30,
+    "Urea_MT3": 50,
+    "NPK_MT3": 30,
+    "Organik_MT3": 25
+  },
+  "Jagung": {
+    "Urea_MT1": 55,
+    "NPK_MT1": 35,
+    "Organik_MT1": 25,
+    "Urea_MT2": 55,
+    "NPK_MT2": 35,
+    "Organik_MT2": 25,
+    "Urea_MT3": 45,
+    "NPK_MT3": 25,
+    "Organik_MT3": 20
+  },
+  "Kedelai": {
+    "Urea_MT1": 40,
+    "NPK_MT1": 50,
+    "Organik_MT1": 35,
+    "Urea_MT2": 40,
+    "NPK_MT2": 50,
+    "Organik_MT2": 35,
+    "Urea_MT3": 35,
+    "NPK_MT3": 45,
+    "Organik_MT3": 30
+  },
+  "Cabai": {
+    "Urea_MT1": 70,
+    "NPK_MT1": 60,
+    "Organik_MT1": 50,
+    "Urea_MT2": 70,
+    "NPK_MT2": 60,
+    "Organik_MT2": 50,
+    "Urea_MT3": 60,
+    "NPK_MT3": 50,
+    "Organik_MT3": 40
+  },
+  "Tomat": {
+    "Urea_MT1": 65,
+    "NPK_MT1": 55,
+    "Organik_MT1": 45,
+    "Urea_MT2": 65,
+    "NPK_MT2": 55,
+    "Organik_MT2": 45,
+    "Urea_MT3": 55,
+    "NPK_MT3": 45,
+    "Organik_MT3": 35
+  }
+}

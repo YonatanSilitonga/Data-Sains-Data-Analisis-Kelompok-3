@@ -1,0 +1,73 @@
+anomaly:
+  contamination: 0.15
+  method: isolation_forest
+clustering:
+  method: kmeans
+  n_clusters: null
+  random_state: 42
+data:
+  input_csv: data/rdkk_dataset.csv
+  output_dir: output/
+models:
+  anomaly_file: anomaly_model.pkl
+  features_file: features.json
+  kmeans_file: kmeans.joblib
+  output_dir: models/
+  scaler_file: scaler.joblib
+standar_pupuk:
+  CABAI:
+    NPK:
+      max: 400.0
+      min: 0.0
+    Organik:
+      max: 1000.0
+      min: 0.0
+    Urea:
+      max: 250.0
+      min: 0.0
+  JAGUNG:
+    NPK:
+      max: 350.0
+      min: 0.0
+    Organik:
+      max: 1000.0
+      min: 0.0
+    Urea:
+      max: 250.0
+      min: 0.0
+  KEDELAI:
+    NPK:
+      max: 120
+      min: 80
+    Organik:
+      max: 400
+      min: 200
+    Urea:
+      max: 180
+      min: 100
+  KOPI:
+    NPK:
+      max: 860.0
+      min: 0.0
+    Organik:
+      max: 1000.0
+      min: 0.0
+    Urea:
+      max: 250.0
+      min: 0.0
+  PADI:
+    NPK:
+      max: 300.0
+      min: 0.0
+    Organik:
+      max: 1000.0
+      min: 0.0
+    Urea:
+      max: 250.0
+      min: 0.0
+  enabled: true
+streamlit:
+  layout: wide
+  page_icon: 🌾
+  page_title: RDKK - Analisis Pupuk Subsidi
+  theme: light
