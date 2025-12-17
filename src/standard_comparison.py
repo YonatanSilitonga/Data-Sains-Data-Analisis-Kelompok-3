@@ -24,6 +24,9 @@ def calculate_standard_comparison(petani_data: pd.Series, standards_manager, kom
     """
     Bandingkan penggunaan pupuk petani dengan standar (jika ada)
     
+    UPDATED: Standar hanya untuk deteksi OVERUSE (melebihi max)
+    Underuse TIDAK menggunakan min standar
+    
     Returns:
         dict dengan detail perbandingan untuk setiap jenis pupuk
     """
@@ -55,129 +58,35 @@ def calculate_standard_comparison(petani_data: pd.Series, standards_manager, kom
     
     comparisons = []
     
-    # Urea
-    if 'Urea' in standard and isinstance(standard['Urea'], dict):
-        urea_std = standard['Urea']
-        urea_min = urea_std.get('min', 0)
-        urea_max = urea_std.get('max', 0)
-        urea_mid = (urea_min + urea_max) / 2
+    for pupuk, per_ha_value in [('Urea', urea_per_ha), ('NPK', npk_per_ha), ('Organik', organik_per_ha)]:
+        if pupuk not in standard or not isinstance(standard[pupuk], dict):
+            continue
         
-        urea_diff = urea_per_ha - urea_mid
-        urea_diff_pct = (urea_diff / urea_mid * 100) if urea_mid > 0 else 0
+        pupuk_std = standard[pupuk]
+        std_max = pupuk_std.get('max', 0)
         
-        # Klasifikasi tingkat overuse/underuse
-        if urea_per_ha < urea_min:
-            if abs(urea_diff_pct) <= 10:
-                level = 'Normal (sedikit di bawah)'
-            elif abs(urea_diff_pct) <= 30:
-                level = 'Underuse Ringan'
-            else:
-                level = 'Underuse Tinggi'
-            status = 'Underuse'
-        elif urea_per_ha > urea_max:
-            if abs(urea_diff_pct) <= 10:
-                level = 'Normal (sedikit di atas)'
-            elif abs(urea_diff_pct) <= 30:
+        if per_ha_value > std_max:
+            overuse_amount = per_ha_value - std_max
+            overuse_pct = (overuse_amount / std_max * 100) if std_max > 0 else 0
+            
+            if overuse_pct <= 10:
                 level = 'Overuse Ringan'
+            elif overuse_pct <= 30:
+                level = 'Overuse Sedang'
             else:
                 level = 'Overuse Tinggi'
             status = 'Overuse'
         else:
+            usage_pct = (per_ha_value / std_max * 100) if std_max > 0 else 0
             level = 'Normal'
             status = 'Normal'
         
         comparisons.append({
-            'jenis': 'Urea',
-            'standar_min': urea_min,
-            'standar_max': urea_max,
-            'standar_mid': urea_mid,
-            'petani_per_ha': urea_per_ha,
-            'selisih_kg': urea_diff,
-            'selisih_persen': urea_diff_pct,
-            'status': status,
-            'level': level
-        })
-    
-    # NPK
-    if 'NPK' in standard and isinstance(standard['NPK'], dict):
-        npk_std = standard['NPK']
-        npk_min = npk_std.get('min', 0)
-        npk_max = npk_std.get('max', 0)
-        npk_mid = (npk_min + npk_max) / 2
-        
-        npk_diff = npk_per_ha - npk_mid
-        npk_diff_pct = (npk_diff / npk_mid * 100) if npk_mid > 0 else 0
-        
-        if npk_per_ha < npk_min:
-            if abs(npk_diff_pct) <= 10:
-                level = 'Normal (sedikit di bawah)'
-            elif abs(npk_diff_pct) <= 30:
-                level = 'Underuse Ringan'
-            else:
-                level = 'Underuse Tinggi'
-            status = 'Underuse'
-        elif npk_per_ha > npk_max:
-            if abs(npk_diff_pct) <= 10:
-                level = 'Normal (sedikit di atas)'
-            elif abs(npk_diff_pct) <= 30:
-                level = 'Overuse Ringan'
-            else:
-                level = 'Overuse Tinggi'
-            status = 'Overuse'
-        else:
-            level = 'Normal'
-            status = 'Normal'
-        
-        comparisons.append({
-            'jenis': 'NPK',
-            'standar_min': npk_min,
-            'standar_max': npk_max,
-            'standar_mid': npk_mid,
-            'petani_per_ha': npk_per_ha,
-            'selisih_kg': npk_diff,
-            'selisih_persen': npk_diff_pct,
-            'status': status,
-            'level': level
-        })
-    
-    # Organik
-    if 'Organik' in standard and isinstance(standard['Organik'], dict):
-        organik_std = standard['Organik']
-        organik_min = organik_std.get('min', 0)
-        organik_max = organik_std.get('max', 0)
-        organik_mid = (organik_min + organik_max) / 2
-        
-        organik_diff = organik_per_ha - organik_mid
-        organik_diff_pct = (organik_diff / organik_mid * 100) if organik_mid > 0 else 0
-        
-        if organik_per_ha < organik_min:
-            if abs(organik_diff_pct) <= 10:
-                level = 'Normal (sedikit di bawah)'
-            elif abs(organik_diff_pct) <= 30:
-                level = 'Underuse Ringan'
-            else:
-                level = 'Underuse Tinggi'
-            status = 'Underuse'
-        elif organik_per_ha > organik_max:
-            if abs(organik_diff_pct) <= 10:
-                level = 'Normal (sedikit di atas)'
-            elif abs(organik_diff_pct) <= 30:
-                level = 'Overuse Ringan'
-            else:
-                level = 'Overuse Tinggi'
-            status = 'Overuse'
-        else:
-            level = 'Normal'
-            status = 'Normal'
-        
-        comparisons.append({
-            'jenis': 'Organik',
-            'standar_min': organik_min,
-            'standar_max': organik_max,
-            'standar_mid': organik_mid,
-            'petani_per_ha': organik_per_ha,
-            'selisih_kg': organik_diff,
-            'selisih_persen': organik_diff_pct,
+            'jenis': pupuk,
+            'standar_max': std_max,
+            'petani_per_ha': per_ha_value,
+            'selisih_dari_max': per_ha_value - std_max,
+            'persen_dari_max': (per_ha_value / std_max * 100) if std_max > 0 else 0,
             'status': status,
             'level': level
         })
@@ -191,7 +100,9 @@ def calculate_standard_comparison(petani_data: pd.Series, standards_manager, kom
 
 def generate_explanation_text(comparison_result: Dict) -> List[str]:
     """
-    Generate penjelasan dalam bahasa awam tentang overuse/underuse
+    Generate penjelasan dalam bahasa awam tentang overuse
+    
+    UPDATED: Hanya jelaskan overuse. Underuse handled separately via statistik.
     
     Returns:
         list of string explanations
@@ -205,46 +116,38 @@ def generate_explanation_text(comparison_result: Dict) -> List[str]:
     
     explanations.append(f"**Komoditas {komoditas} dengan luas lahan {luas_ha:.2f} ha**")
     explanations.append("")
+    explanations.append("**📌 Filosofi Standar**: Standar pupuk adalah **batas atas hak/alokasi maksimal**, BUKAN target ideal. Petani boleh menggunakan lebih rendah tanpa masalah.")
+    explanations.append("")
     
     for comp in comparison_result.get('comparisons', []):
         jenis = comp['jenis']
-        std_min = comp['standar_min']
         std_max = comp['standar_max']
-        std_mid = comp['standar_mid']
         petani = comp['petani_per_ha']
-        selisih_kg = comp['selisih_kg']
-        selisih_pct = comp['selisih_persen']
+        persen_dari_max = comp['persen_dari_max']
         status = comp['status']
         level = comp['level']
         
         # Header
         if status == 'Overuse':
             emoji = '🔴'
-        elif status == 'Underuse':
-            emoji = '🟡'
         else:
             emoji = '🟢'
         
         explanations.append(f"{emoji} **{jenis}**: {level}")
         
-        # Detail
-        explanations.append(f"- Standar: {std_min:.0f}-{std_max:.0f} kg/ha (rata-rata {std_mid:.0f} kg/ha)")
-        explanations.append(f"- Petani menggunakan: {petani:.1f} kg/ha")
+        explanations.append(f"- Batas Maksimal: {std_max:.0f} kg/ha")
+        explanations.append(f"- Petani menggunakan: {petani:.1f} kg/ha ({persen_dari_max:.0f}% dari maksimal)")
         
         if status == 'Overuse':
-            explanations.append(f"- Lebih {abs(selisih_kg):.1f} kg/ha ({abs(selisih_pct):.1f}%) dari standar")
+            overuse_amount = petani - std_max
+            explanations.append(f"- ⚠️ **MELEBIHI BATAS**: +{overuse_amount:.1f} kg/ha di atas maksimal")
             if level == 'Overuse Tinggi':
-                explanations.append(f"- ⚠️ **Dampak**: Penggunaan berlebih dapat menyebabkan pemborosan biaya, pencemaran tanah, dan menurunkan kualitas hasil panen")
+                explanations.append(f"- **Dampak**: Melebihi alokasi hak subsidi. Perlu evaluasi dan penyesuaian.")
             else:
-                explanations.append(f"- ℹ️ Sedikit melebihi standar, perlu evaluasi apakah sesuai kondisi lahan")
-        elif status == 'Underuse':
-            explanations.append(f"- Kurang {abs(selisih_kg):.1f} kg/ha ({abs(selisih_pct):.1f}%) dari standar")
-            if level == 'Underuse Tinggi':
-                explanations.append(f"- ⚠️ **Dampak**: Kekurangan pupuk dapat menurunkan produktivitas dan hasil panen tidak optimal")
-            else:
-                explanations.append(f"- ℹ️ Sedikit di bawah standar, mungkin sudah cukup tergantung kondisi lahan")
+                explanations.append(f"- Sedikit melebihi batas, perlu konfirmasi data.")
         else:
-            explanations.append(f"- ✅ Penggunaan sesuai standar")
+            remaining = std_max - petani
+            explanations.append(f"- ✅ Dalam batas (sisa hak: {remaining:.1f} kg/ha)")
         
         explanations.append("")
     
@@ -252,19 +155,23 @@ def generate_explanation_text(comparison_result: Dict) -> List[str]:
 
 def get_educational_box() -> str:
     """
-    Return konten box edukatif tentang overuse/underuse
+    Return konten box edukatif tentang standar pupuk
+    
+    UPDATED: Jelaskan filosofi baru
     """
     return """
     <div class="info-box">
-    <strong>📚 Memahami Overuse & Underuse:</strong><br>
+    <strong>📚 Memahami Standar Pupuk:</strong><br>
     <ul style="margin: 10px 0; padding-left: 20px;">
-        <li><strong>Overuse (Penggunaan Berlebih)</strong>: Menggunakan pupuk melebihi standar rekomendasi. 
-        Bisa menyebabkan pemborosan biaya, pencemaran lingkungan, dan menurunkan kualitas hasil panen.</li>
-        <li><strong>Underuse (Penggunaan Kurang)</strong>: Menggunakan pupuk di bawah standar rekomendasi. 
-        Dapat menurunkan produktivitas karena tanaman kekurangan nutrisi.</li>
-        <li><strong>Normal</strong>: Penggunaan sesuai dengan rentang standar yang direkomendasikan.</li>
-        <li>🔍 <em>Catatan</em>: Standar adalah pedoman umum. Kebutuhan aktual bisa berbeda tergantung kondisi tanah, 
-        iklim, dan praktik pertanian masing-masing petani.</li>
+        <li><strong>Standar Pupuk = Batas Atas Hak</strong>: Standar adalah alokasi maksimal (kg/ha) yang BOLEH ditebus petani, 
+        BUKAN kewajiban atau target ideal.</li>
+        <li><strong>Overuse (Penggunaan Melebihi Batas)</strong>: Menggunakan pupuk melebihi standar maksimal. 
+        Ini adalah anomali kebijakan karena melebihi hak alokasi.</li>
+        <li><strong>Di Bawah Standar = BOLEH</strong>: Petani boleh membeli pupuk di bawah standar 
+        (misal 150 dari 250 kg/ha) tanpa dianggap kesalahan. Ini hak petani untuk menyesuaikan dengan kondisi lahan.</li>
+        <li><strong>Underuse Statistik</strong>: Berbeda dari standar, underuse statistik adalah penggunaan yang 
+        SANGAT JAUH di bawah mayoritas petani sejenis (bukan pelanggaran kebijakan, tapi pola yang tidak biasa).</li>
+        <li>🔍 <em>Catatan</em>: Setiap petani punya kondisi unik. Yang penting: jangan melebihi batas maksimal.</li>
     </ul>
     </div>
     """
@@ -310,6 +217,9 @@ def calculate_standard_comparison(petani_data: pd.Series, standards_manager, kom
     """
     Bandingkan penggunaan pupuk petani dengan standar (jika ada)
     
+    UPDATED: Standar hanya untuk deteksi OVERUSE (melebihi max)
+    Underuse TIDAK menggunakan min standar
+    
     Returns:
         dict dengan detail perbandingan untuk setiap jenis pupuk
     """
@@ -341,129 +251,35 @@ def calculate_standard_comparison(petani_data: pd.Series, standards_manager, kom
     
     comparisons = []
     
-    # Urea
-    if 'Urea' in standard and isinstance(standard['Urea'], dict):
-        urea_std = standard['Urea']
-        urea_min = urea_std.get('min', 0)
-        urea_max = urea_std.get('max', 0)
-        urea_mid = (urea_min + urea_max) / 2
+    for pupuk, per_ha_value in [('Urea', urea_per_ha), ('NPK', npk_per_ha), ('Organik', organik_per_ha)]:
+        if pupuk not in standard or not isinstance(standard[pupuk], dict):
+            continue
         
-        urea_diff = urea_per_ha - urea_mid
-        urea_diff_pct = (urea_diff / urea_mid * 100) if urea_mid > 0 else 0
+        pupuk_std = standard[pupuk]
+        std_max = pupuk_std.get('max', 0)
         
-        # Klasifikasi tingkat overuse/underuse
-        if urea_per_ha < urea_min:
-            if abs(urea_diff_pct) <= 10:
-                level = 'Normal (sedikit di bawah)'
-            elif abs(urea_diff_pct) <= 30:
-                level = 'Underuse Ringan'
-            else:
-                level = 'Underuse Tinggi'
-            status = 'Underuse'
-        elif urea_per_ha > urea_max:
-            if abs(urea_diff_pct) <= 10:
-                level = 'Normal (sedikit di atas)'
-            elif abs(urea_diff_pct) <= 30:
+        if per_ha_value > std_max:
+            overuse_amount = per_ha_value - std_max
+            overuse_pct = (overuse_amount / std_max * 100) if std_max > 0 else 0
+            
+            if overuse_pct <= 10:
                 level = 'Overuse Ringan'
+            elif overuse_pct <= 30:
+                level = 'Overuse Sedang'
             else:
                 level = 'Overuse Tinggi'
             status = 'Overuse'
         else:
+            usage_pct = (per_ha_value / std_max * 100) if std_max > 0 else 0
             level = 'Normal'
             status = 'Normal'
         
         comparisons.append({
-            'jenis': 'Urea',
-            'standar_min': urea_min,
-            'standar_max': urea_max,
-            'standar_mid': urea_mid,
-            'petani_per_ha': urea_per_ha,
-            'selisih_kg': urea_diff,
-            'selisih_persen': urea_diff_pct,
-            'status': status,
-            'level': level
-        })
-    
-    # NPK
-    if 'NPK' in standard and isinstance(standard['NPK'], dict):
-        npk_std = standard['NPK']
-        npk_min = npk_std.get('min', 0)
-        npk_max = npk_std.get('max', 0)
-        npk_mid = (npk_min + npk_max) / 2
-        
-        npk_diff = npk_per_ha - npk_mid
-        npk_diff_pct = (npk_diff / npk_mid * 100) if npk_mid > 0 else 0
-        
-        if npk_per_ha < npk_min:
-            if abs(npk_diff_pct) <= 10:
-                level = 'Normal (sedikit di bawah)'
-            elif abs(npk_diff_pct) <= 30:
-                level = 'Underuse Ringan'
-            else:
-                level = 'Underuse Tinggi'
-            status = 'Underuse'
-        elif npk_per_ha > npk_max:
-            if abs(npk_diff_pct) <= 10:
-                level = 'Normal (sedikit di atas)'
-            elif abs(npk_diff_pct) <= 30:
-                level = 'Overuse Ringan'
-            else:
-                level = 'Overuse Tinggi'
-            status = 'Overuse'
-        else:
-            level = 'Normal'
-            status = 'Normal'
-        
-        comparisons.append({
-            'jenis': 'NPK',
-            'standar_min': npk_min,
-            'standar_max': npk_max,
-            'standar_mid': npk_mid,
-            'petani_per_ha': npk_per_ha,
-            'selisih_kg': npk_diff,
-            'selisih_persen': npk_diff_pct,
-            'status': status,
-            'level': level
-        })
-    
-    # Organik
-    if 'Organik' in standard and isinstance(standard['Organik'], dict):
-        organik_std = standard['Organik']
-        organik_min = organik_std.get('min', 0)
-        organik_max = organik_std.get('max', 0)
-        organik_mid = (organik_min + organik_max) / 2
-        
-        organik_diff = organik_per_ha - organik_mid
-        organik_diff_pct = (organik_diff / organik_mid * 100) if organik_mid > 0 else 0
-        
-        if organik_per_ha < organik_min:
-            if abs(organik_diff_pct) <= 10:
-                level = 'Normal (sedikit di bawah)'
-            elif abs(organik_diff_pct) <= 30:
-                level = 'Underuse Ringan'
-            else:
-                level = 'Underuse Tinggi'
-            status = 'Underuse'
-        elif organik_per_ha > organik_max:
-            if abs(organik_diff_pct) <= 10:
-                level = 'Normal (sedikit di atas)'
-            elif abs(organik_diff_pct) <= 30:
-                level = 'Overuse Ringan'
-            else:
-                level = 'Overuse Tinggi'
-            status = 'Overuse'
-        else:
-            level = 'Normal'
-            status = 'Normal'
-        
-        comparisons.append({
-            'jenis': 'Organik',
-            'standar_min': organik_min,
-            'standar_max': organik_max,
-            'standar_mid': organik_mid,
-            'petani_per_ha': organik_per_ha,
-            'selisih_kg': organik_diff,
-            'selisih_persen': organik_diff_pct,
+            'jenis': pupuk,
+            'standar_max': std_max,
+            'petani_per_ha': per_ha_value,
+            'selisih_dari_max': per_ha_value - std_max,
+            'persen_dari_max': (per_ha_value / std_max * 100) if std_max > 0 else 0,
             'status': status,
             'level': level
         })
@@ -477,7 +293,9 @@ def calculate_standard_comparison(petani_data: pd.Series, standards_manager, kom
 
 def generate_explanation_text(comparison_result: Dict) -> List[str]:
     """
-    Generate penjelasan dalam bahasa awam tentang overuse/underuse
+    Generate penjelasan dalam bahasa awam tentang overuse
+    
+    UPDATED: Hanya jelaskan overuse. Underuse handled separately via statistik.
     
     Returns:
         list of string explanations
@@ -491,46 +309,38 @@ def generate_explanation_text(comparison_result: Dict) -> List[str]:
     
     explanations.append(f"**Komoditas {komoditas} dengan luas lahan {luas_ha:.2f} ha**")
     explanations.append("")
+    explanations.append("**📌 Filosofi Standar**: Standar pupuk adalah **batas atas hak/alokasi maksimal**, BUKAN target ideal. Petani boleh menggunakan lebih rendah tanpa masalah.")
+    explanations.append("")
     
     for comp in comparison_result.get('comparisons', []):
         jenis = comp['jenis']
-        std_min = comp['standar_min']
         std_max = comp['standar_max']
-        std_mid = comp['standar_mid']
         petani = comp['petani_per_ha']
-        selisih_kg = comp['selisih_kg']
-        selisih_pct = comp['selisih_persen']
+        persen_dari_max = comp['persen_dari_max']
         status = comp['status']
         level = comp['level']
         
         # Header
         if status == 'Overuse':
             emoji = '🔴'
-        elif status == 'Underuse':
-            emoji = '🟡'
         else:
             emoji = '🟢'
         
         explanations.append(f"{emoji} **{jenis}**: {level}")
         
-        # Detail
-        explanations.append(f"- Standar: {std_min:.0f}-{std_max:.0f} kg/ha (rata-rata {std_mid:.0f} kg/ha)")
-        explanations.append(f"- Petani menggunakan: {petani:.1f} kg/ha")
+        explanations.append(f"- Batas Maksimal: {std_max:.0f} kg/ha")
+        explanations.append(f"- Petani menggunakan: {petani:.1f} kg/ha ({persen_dari_max:.0f}% dari maksimal)")
         
         if status == 'Overuse':
-            explanations.append(f"- Lebih {abs(selisih_kg):.1f} kg/ha ({abs(selisih_pct):.1f}%) dari standar")
+            overuse_amount = petani - std_max
+            explanations.append(f"- ⚠️ **MELEBIHI BATAS**: +{overuse_amount:.1f} kg/ha di atas maksimal")
             if level == 'Overuse Tinggi':
-                explanations.append(f"- ⚠️ **Dampak**: Penggunaan berlebih dapat menyebabkan pemborosan biaya, pencemaran tanah, dan menurunkan kualitas hasil panen")
+                explanations.append(f"- **Dampak**: Melebihi alokasi hak subsidi. Perlu evaluasi dan penyesuaian.")
             else:
-                explanations.append(f"- ℹ️ Sedikit melebihi standar, perlu evaluasi apakah sesuai kondisi lahan")
-        elif status == 'Underuse':
-            explanations.append(f"- Kurang {abs(selisih_kg):.1f} kg/ha ({abs(selisih_pct):.1f}%) dari standar")
-            if level == 'Underuse Tinggi':
-                explanations.append(f"- ⚠️ **Dampak**: Kekurangan pupuk dapat menurunkan produktivitas dan hasil panen tidak optimal")
-            else:
-                explanations.append(f"- ℹ️ Sedikit di bawah standar, mungkin sudah cukup tergantung kondisi lahan")
+                explanations.append(f"- Sedikit melebihi batas, perlu konfirmasi data.")
         else:
-            explanations.append(f"- ✅ Penggunaan sesuai standar")
+            remaining = std_max - petani
+            explanations.append(f"- ✅ Dalam batas (sisa hak: {remaining:.1f} kg/ha)")
         
         explanations.append("")
     
@@ -538,19 +348,23 @@ def generate_explanation_text(comparison_result: Dict) -> List[str]:
 
 def get_educational_box() -> str:
     """
-    Return konten box edukatif tentang overuse/underuse
+    Return konten box edukatif tentang standar pupuk
+    
+    UPDATED: Jelaskan filosofi baru
     """
     return """
     <div class="info-box">
-    <strong>📚 Memahami Overuse & Underuse:</strong><br>
+    <strong>📚 Memahami Standar Pupuk:</strong><br>
     <ul style="margin: 10px 0; padding-left: 20px;">
-        <li><strong>Overuse (Penggunaan Berlebih)</strong>: Menggunakan pupuk melebihi standar rekomendasi. 
-        Bisa menyebabkan pemborosan biaya, pencemaran lingkungan, dan menurunkan kualitas hasil panen.</li>
-        <li><strong>Underuse (Penggunaan Kurang)</strong>: Menggunakan pupuk di bawah standar rekomendasi. 
-        Dapat menurunkan produktivitas karena tanaman kekurangan nutrisi.</li>
-        <li><strong>Normal</strong>: Penggunaan sesuai dengan rentang standar yang direkomendasikan.</li>
-        <li>🔍 <em>Catatan</em>: Standar adalah pedoman umum. Kebutuhan aktual bisa berbeda tergantung kondisi tanah, 
-        iklim, dan praktik pertanian masing-masing petani.</li>
+        <li><strong>Standar Pupuk = Batas Atas Hak</strong>: Standar adalah alokasi maksimal (kg/ha) yang BOLEH ditebus petani, 
+        BUKAN kewajiban atau target ideal.</li>
+        <li><strong>Overuse (Penggunaan Melebihi Batas)</strong>: Menggunakan pupuk melebihi standar maksimal. 
+        Ini adalah anomali kebijakan karena melebihi hak alokasi.</li>
+        <li><strong>Di Bawah Standar = BOLEH</strong>: Petani boleh membeli pupuk di bawah standar 
+        (misal 150 dari 250 kg/ha) tanpa dianggap kesalahan. Ini hak petani untuk menyesuaikan dengan kondisi lahan.</li>
+        <li><strong>Underuse Statistik</strong>: Berbeda dari standar, underuse statistik adalah penggunaan yang 
+        SANGAT JAUH di bawah mayoritas petani sejenis (bukan pelanggaran kebijakan, tapi pola yang tidak biasa).</li>
+        <li>🔍 <em>Catatan</em>: Setiap petani punya kondisi unik. Yang penting: jangan melebihi batas maksimal.</li>
     </ul>
     </div>
     """

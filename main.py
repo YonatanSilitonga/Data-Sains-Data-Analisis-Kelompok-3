@@ -150,6 +150,7 @@ def run_full_pipeline(config):
     if standards_enabled:
         all_standards = standards_manager.get_all_standards()
         
+        # Pass standards directly without calculating midpoints
         for komoditas, std in all_standards.items():
             if not isinstance(std, dict):
                 continue
@@ -160,10 +161,8 @@ def run_full_pipeline(config):
                     pupuk_std = std[pupuk]
                     if 'min' in pupuk_std and 'max' in pupuk_std:
                         if isinstance(pupuk_std['min'], (int, float)) and isinstance(pupuk_std['max'], (int, float)):
-                            for mt in ['MT1', 'MT2', 'MT3']:
-                                col = f'{pupuk}_{mt}'
-                                avg_value = (pupuk_std['min'] + pupuk_std['max']) / 2
-                                standards_dict[komoditas][col] = avg_value
+                            # Just pass the dict, let feature engineering decide what to do
+                            standards_dict[komoditas][pupuk] = pupuk_std
     
     df_features = feature_engineering_pipeline(
         df_clean, 

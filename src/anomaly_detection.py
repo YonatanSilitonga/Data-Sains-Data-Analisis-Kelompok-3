@@ -136,8 +136,105 @@ def train_local_outlier_factor(X, contamination=0.1, random_state=42):
     
     return model, scaler, predictions, scores_normalized
 
+def detect_statistical_underuse(df, percentile_threshold=10):
+    """
+    Deteksi underuse berbasis STATISTIK (BUKAN standar min)
+    
+    Underuse = penggunaan pupuk sangat jauh di bawah mayoritas petani sejenis
+    Menggunakan percentile-based detection
+    
+    Parameters:
+    - df: DataFrame with per_ha columns and Komoditas
+    - percentile_threshold: threshold percentile (default 10 = P10)
+    
+    Returns:
+    - df with Underuse_Statistik_Urea, Underuse_Statistik_NPK, Underuse_Statistik_Organik columns (Boolean)
+    """
+    df_copy = df.copy()
+    
+    for pupuk in ['Urea', 'NPK', 'Organik']:
+        per_ha_col = f'{pupuk}_per_ha'
+        underuse_col = f'Underuse_Statistik_{pupuk}'
+        
+        if per_ha_col not in df_copy.columns or 'Komoditas' not in df_copy.columns:
+            df_copy[underuse_col] = False
+            continue
+        
+        # Calculate per commodity
+        df_copy[underuse_col] = False
+        
+        for komoditas in df_copy['Komoditas'].unique():
+            mask = df_copy['Komoditas'] == komoditas
+            commodity_data = df_copy.loc[mask, per_ha_col]
+            
+            if len(commodity_data) < 5:  # Need minimum data
+                continue
+            
+            # Calculate percentile threshold
+            p_threshold = commodity_data.quantile(percentile_threshold / 100)
+            
+            # Mark as statistical underuse if below threshold
+            df_copy.loc[mask & (df_copy[per_ha_col] < p_threshold), underuse_col] = True
+    
+    # Overall statistical underuse flag
+    df_copy['Underuse_Statistik'] = (
+        df_copy.get('Underuse_Statistik_Urea', False) |
+        df_copy.get('Underuse_Statistik_NPK', False) |
+        df_copy.get('Underuse_Statistik_Organik', False)
+    )
+    
+    return df_copy
 
-def detect_anomalies(df, method='isolation_forest', contamination=0.1, include_luas=False, random_state=42):
+def detect_policy_overuse(df, standards_manager):
+    """
+    Deteksi overuse berbasis KEBIJAKAN (standar max)
+    
+    Overuse = melebihi batas atas hak/alokasi maksimal
+    
+    Parameters:
+    - df: DataFrame with per_ha columns and Komoditas
+    - standards_manager: StandardsManager instance
+    
+    Returns:
+    - df with Overuse_Kebijakan_Urea, Overuse_Kebijakan_NPK, Overuse_Kebijakan_Organik columns (Boolean)
+    """
+    df_copy = df.copy()
+    
+    for pupuk in ['Urea', 'NPK', 'Organik']:
+        per_ha_col = f'{pupuk}_per_ha'
+        overuse_col = f'Overuse_Kebijakan_{pupuk}'
+        
+        df_copy[overuse_col] = False
+        
+        if per_ha_col not in df_copy.columns or 'Komoditas' not in df_copy.columns:
+            continue
+        
+        for komoditas in df_copy['Komoditas'].unique():
+            standard = standards_manager.get_standard(komoditas)
+            
+            if not standard or pupuk not in standard:
+                continue
+            
+            pupuk_std = standard[pupuk]
+            if not isinstance(pupuk_std, dict) or 'max' not in pupuk_std:
+                continue
+            
+            max_threshold = pupuk_std['max']
+            
+            # Mark as policy overuse if exceeds max
+            mask = (df_copy['Komoditas'] == komoditas) & (df_copy[per_ha_col] > max_threshold)
+            df_copy.loc[mask, overuse_col] = True
+    
+    # Overall policy overuse flag
+    df_copy['Overuse_Kebijakan'] = (
+        df_copy.get('Overuse_Kebijakan_Urea', False) |
+        df_copy.get('Overuse_Kebijakan_NPK', False) |
+        df_copy.get('Overuse_Kebijakan_Organik', False)
+    )
+    
+    return df_copy
+
+def detect_anomalies(df, method='isolation_forest', contamination=0.1, include_luas=False, random_state=42, standards_manager=None):
     """
     Pipeline lengkap deteksi anomali BARU
     
@@ -151,6 +248,7 @@ def detect_anomalies(df, method='isolation_forest', contamination=0.1, include_l
     - contamination: proporsi anomali yang diharapkan
     - include_luas: apakah Luas_ha dimasukkan sebagai fitur (default: False)
     - random_state: seed untuk hasil deterministik dan konsisten (default: 42)
+    - standards_manager: StandardsManager instance untuk deteksi overuse kebijakan
     """
     print_section_header("ANOMALY DETECTION - NEW APPROACH")
     print("Basis: Total Pupuk per Jenis per Hektar")
@@ -177,14 +275,34 @@ def detect_anomalies(df, method='isolation_forest', contamination=0.1, include_l
     df_result['Anomaly_Score'] = scores
     df_result['Anomaly_Severity'] = categorize_anomaly_severity(scores)
     
+    if standards_manager:
+        print("\n→ Detecting policy overuse (based on standard max)...")
+        df_result = detect_policy_overuse(df_result, standards_manager)
+    
+    print("→ Detecting statistical underuse (based on percentile P10)...")
+    df_result = detect_statistical_underuse(df_result, percentile_threshold=10)
+    
+    if standards_manager and 'Underuse_Statistik' in df_result.columns:
+        df_result['Status_Final'] = 'NORMAL'
+        
+        overuse_mask = df_result.get('Overuse_Kebijakan', False)
+        underuse_mask = df_result.get('Underuse_Statistik', False)
+        
+        df_result.loc[overuse_mask & ~underuse_mask, 'Status_Final'] = 'OVERUSE'
+        df_result.loc[~overuse_mask & underuse_mask, 'Status_Final'] = 'UNDERUSE_STATISTIK'
+        df_result.loc[overuse_mask & underuse_mask, 'Status_Final'] = 'OVERUSE + UNDERUSE_STATISTIK'
+    
     print("\n" + "="*60)
     print("RINGKASAN HASIL")
     print("="*60)
     print(f"Total petani: {len(df_result)}")
     print(f"Normal: {(df_result['Anomaly_Label'] == 'Normal').sum()} ({(df_result['Anomaly_Label'] == 'Normal').sum()/len(df_result)*100:.1f}%)")
     print(f"Anomali: {(df_result['Anomaly_Label'] == 'Anomali').sum()} ({(df_result['Anomaly_Label'] == 'Anomali').sum()/len(df_result)*100:.1f}%)")
-    print("\nSeverity breakdown:")
-    print(df_result['Anomaly_Severity'].value_counts())
+    
+    if standards_manager and 'Status_Final' in df_result.columns:
+        print("\nStatus Kebijakan:")
+        print(df_result['Status_Final'].value_counts())
+    
     print("="*60 + "\n")
     
     return df_result, model, scaler, feature_cols_used

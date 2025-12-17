@@ -1,6 +1,6 @@
 """
-RDKK Streamlit Dashboard - Interactive Dashboard
-Complete dashboard dengan toggle standar pupuk, prediksi data baru, dan visualisasi lengkap
+RDKK Streamlit Dashboard - Layout Improvements
+Perbaikan pada toggle placement dan spacing issues
 """
 
 import streamlit as st
@@ -23,7 +23,7 @@ from src.feature_engineering import feature_engineering_pipeline
 from src.clustering import run_clustering_pipeline
 from src.recommendation import generate_recommendations
 
-from src.anomaly_explain import get_anomaly_explanation, get_anomaly_comparison, calculate_median_and_std
+from src.anomaly_explain import get_anomaly_explanation, get_anomaly_explanation, get_anomaly_comparison, calculate_median_and_std
 from src.utils import *
 from src.standard_comparison import (
     calculate_standard_comparison,
@@ -40,6 +40,15 @@ def load_config():
 
 config = load_config()
 
+def get_all_commodities_from_config():
+    """Ambil semua komoditas dari config.yaml standar_pupuk"""
+    standards = config.get('standar_pupuk', {})
+    if not standards:
+        return []
+    # Filter out 'enabled' key
+    commodities = [k for k in standards.keys() if k != 'enabled']
+    return sorted(commodities)
+
 # Initialize session state
 if 'standards_manager' not in st.session_state:
     st.session_state.standards_manager = get_standard_manager()
@@ -48,8 +57,16 @@ if 'standards_enabled' not in st.session_state:
 
 standards_manager = st.session_state.standards_manager
 
+# IMPROVED CSS - Fixed spacing and better layout
 st.markdown("""
 <style>
+    /* Remove default Streamlit padding */
+    .main .block-container {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        max-width: 100% !important;
+    }
+    
     .main-header {
         font-size: 2.5rem;
         font-weight: bold;
@@ -60,8 +77,41 @@ st.markdown("""
     .sub-header {
         text-align: center;
         color: #666;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
+    
+    /* Toggle container - Better positioning */
+    .toggle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Status badge */
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+    }
+    
+    .status-active {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+    
+    .status-inactive {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    
     .section-header {
         font-size: 1.8rem;
         font-weight: bold;
@@ -114,6 +164,16 @@ st.markdown("""
         font-size: 1.1rem;
         font-weight: 600;
     }
+    
+    /* Full width for content */
+    .element-container {
+        width: 100% !important;
+    }
+    
+    /* Better dataframe display */
+    .stDataFrame {
+        width: 100% !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -159,48 +219,53 @@ def load_models():
 df = load_data()
 models = load_models()
 
+# IMPROVED HEADER LAYOUT
 st.markdown('<div class="main-header">🌾 RDKK - Sistem Analisis Pupuk Subsidi</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Dashboard Interaktif untuk Deteksi Over/Under Use Pupuk dengan Machine Learning</div>', unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns([2, 1, 2])
-with col2:
+# REST OF YOUR CODE CONTINUES HERE...
+# The sidebar with toggle at the top
+
+with st.sidebar:
+    st.title("Menu")
+    st.markdown("---")       
+    
     standards_enabled = st.toggle(
-        "🎚️ Aktifkan Standar Pupuk", 
+        "Aktifkan Standar Pupuk", 
         value=st.session_state.standards_enabled,
-        help="Toggle ON: Analisis menggunakan standar pupuk per komoditas\nToggle OFF: Analisis berbasis data aktual saja"
+        help="Toggle ON: Analisis menggunakan standar pupuk per komoditas\nToggle OFF: Analisis berbasis data aktual saja",
+        key="sidebar_toggle"
     )
+    
     if standards_enabled != st.session_state.standards_enabled:
         st.session_state.standards_enabled = standards_enabled
         st.rerun()
-
-if standards_enabled:
-    st.success("✅ Mode: Analisis dengan standar pupuk aktif")
-else:
-    st.info("ℹ️ Mode: Analisis berbasis data aktual (tanpa standar)")
-
-st.markdown("---")
-
-with st.sidebar:
-    # st.image("https://via.placeholder.com/150x50/2e7d32/FFFFFF?text=RDKK", use_container_width=True)
-    st.title("📊 Menu Navigasi")
+    
+    # Status indicator kompak
+    if standards_enabled:
+        st.success("**Mode:** Standar Aktif", icon="✅")
+    else:
+        st.info("**Mode:** Data Aktual", icon="ℹ️")
+    
     st.markdown("---")
     
+    # Navigation menu
     page = st.radio(
         "Pilih Halaman:",
         [
-            "🏠 Dashboard Utama",
-            "📊 Data Explorer", 
-            "🔍 Prediksi Data Baru",
-            "🎯 Clustering & Pola",
-            "💡 Rekomendasi",
-            "📚 Tentang Model",
-            "⚙️ Kelola Standar"
+            "Dashboard Utama",
+            "Data Explorer", 
+            "Prediksi Data Baru",
+            "Clustering & Pola",
+            "Rekomendasi",
+            "Tentang Model",
+            "Kelola Standar"
         ],
         label_visibility="collapsed"
     )
     
     st.markdown("---")
-    st.markdown("### 📈 Info Sistem")
+    st.markdown("### Info Sistem")
     
     if df is not None:
         st.metric("Total Petani", f"{len(df):,}")
@@ -220,54 +285,54 @@ with st.sidebar:
         st.warning("⚠️ Data belum tersedia\n\nJalankan pipeline:\n`python main.py`")
     
     st.markdown("---")
-    st.info("🔧 Version: 4.0.0\n📅 Updated: 2025")
+    st.info("🔧 Version: 4.1.0\n📅 Updated: Dec 2025")
 
-# ==========================================
-# PAGE 1: DASHBOARD UTAMA
-# ==========================================
-if page == "🏠 Dashboard Utama":
+# PAGE CONTENT CONTINUES HERE...
+# (All your existing page logic remains the same)
+
+if page == "Dashboard Utama":
     
     if df is None:
         st.error("❌ Data tidak tersedia. Jalankan `python main.py` terlebih dahulu untuk memproses data.")
         st.code("python main.py", language="bash")
         st.stop()
     
-    st.markdown('<div class="section-header">📊 Ringkasan Cepat</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Ringkasan Cepat</div>', unsafe_allow_html=True)
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("👨‍🌾 Total Petani", f"{len(df):,}")
+        st.metric("Total Petani", f"{len(df):,}")
     
     with col2:
         if standards_enabled and 'Final_Status' in df.columns:
             underuse = (df['Final_Status'] == 'Underuse').sum()
-            st.metric("📉 Underuse", underuse, 
+            st.metric("Underuse", underuse, 
                      delta=f"-{underuse/len(df)*100:.1f}%", 
                      delta_color="inverse")
         else:
-            st.metric("📉 Underuse", "N/A", help="Aktifkan standar pupuk")
+            st.metric("Underuse", "N/A", help="Aktifkan standar pupuk")
     
     with col3:
         if standards_enabled and 'Final_Status' in df.columns:
             overuse = (df['Final_Status'] == 'Overuse').sum()
-            st.metric("📈 Overuse", overuse,
+            st.metric("Overuse", overuse,
                      delta=f"+{overuse/len(df)*100:.1f}%",
                      delta_color="inverse")
         else:
-            st.metric("📈 Overuse", "N/A", help="Aktifkan standar pupuk")
+            st.metric("Overuse", "N/A", help="Aktifkan standar pupuk")
     
     with col4:
         if 'Cluster_ID' in df.columns:
             clusters = df['Cluster_ID'].nunique()
-            st.metric("🎯 Clusters", clusters)
+            st.metric("Clusters", clusters)
         else:
-            st.metric("🎯 Clusters", "N/A")
+            st.metric("Clusters", "N/A")
     
     st.markdown("---")
     
-    if standards_enabled and 'Final_Status' in df.columns:
-        st.markdown('<div class="section-header">📊 Distribusi Status Penggunaan Pupuk</div>', unsafe_allow_html=True)
+    if standards_enabled:
+        st.markdown('<div class="section-header">Distribusi Status Penggunaan Pupuk</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         
@@ -304,7 +369,14 @@ if page == "🏠 Dashboard Utama":
         st.info("ℹ️ Aktifkan standar pupuk untuk melihat distribusi status underuse/overuse")
     
     if standards_enabled:
-        st.markdown('<div class="section-header">🌱 Perbandingan: Pupuk Aktual vs Standar</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Perbandingan: Pupuk Aktual vs Batas Maksimal Standar</div>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="info-box">
+        <strong>📌 Penting:</strong> Standar pupuk adalah <strong>batas atas hak/alokasi maksimal</strong>, bukan target ideal. 
+        Grafik menunjukkan batas maksimal sebagai garis pembatas. Petani boleh menggunakan di bawah batas ini.
+        </div>
+        """, unsafe_allow_html=True)
         
         all_standards = standards_manager.get_all_standards()
         
@@ -313,9 +385,9 @@ if page == "🏠 Dashboard Utama":
             actual_urea = []
             actual_npk = []
             actual_organik = []
-            std_urea_mid = []
-            std_npk_mid = []
-            std_organik_mid = []
+            std_urea_max = []
+            std_npk_max = []
+            std_organik_max = []
             
             for komoditas in all_standards.keys():
                 komoditas_data = df[df['Komoditas'] == komoditas]
@@ -325,10 +397,10 @@ if page == "🏠 Dashboard Utama":
                     actual_npk.append(komoditas_data['NPK_per_ha'].mean())
                     actual_organik.append(komoditas_data['Organik_per_ha'].mean())
                     
-                    std = all_standards[komoditas]
-                    std_urea_mid.append((std['Urea']['min'] + std['Urea']['max']) / 2)
-                    std_npk_mid.append((std['NPK']['min'] + std['NPK']['max']) / 2)
-                    std_organik_mid.append((std['Organik']['min'] + std['Organik']['max']) / 2)
+                    std = standards_manager.get_standard(komoditas)
+                    std_urea_max.append(std['Urea']['max'])
+                    std_npk_max.append(std['NPK']['max'])
+                    std_organik_max.append(std['Organik']['max'])
             
             if komoditas_list:
                 tab1, tab2, tab3 = st.tabs(["🌾 Urea", "🌱 NPK", "🍂 Organik"])
@@ -338,21 +410,23 @@ if page == "🏠 Dashboard Utama":
                     fig.add_trace(go.Bar(
                         x=komoditas_list, 
                         y=actual_urea, 
-                        name='Aktual', 
+                        name='Rata-rata Aktual', 
                         marker_color='#66b5f6'
                     ))
-                    fig.add_trace(go.Bar(
+                    fig.add_trace(go.Scatter(
                         x=komoditas_list, 
-                        y=std_urea_mid, 
-                        name='Standar', 
-                        marker_color='#1976d2'
+                        y=std_urea_max, 
+                        name='Batas Maksimal', 
+                        mode='lines+markers',
+                        line=dict(color='#d32f2f', width=3, dash='dash'),
+                        marker=dict(size=8, color='#d32f2f')
                     ))
                     fig.update_layout(
-                        title="Urea: Penggunaan Aktual vs Standar (kg/ha)", 
-                        barmode='group', 
+                        title="Urea: Penggunaan Aktual vs Batas Maksimal (kg/ha)", 
                         height=400,
                         xaxis_title="Komoditas",
-                        yaxis_title="kg/ha"
+                        yaxis_title="kg/ha",
+                        hovermode='x unified'
                     )
                     st.plotly_chart(fig, use_container_width=True)
                 
@@ -361,21 +435,23 @@ if page == "🏠 Dashboard Utama":
                     fig.add_trace(go.Bar(
                         x=komoditas_list, 
                         y=actual_npk, 
-                        name='Aktual', 
+                        name='Rata-rata Aktual', 
                         marker_color='#81c784'
                     ))
-                    fig.add_trace(go.Bar(
+                    fig.add_trace(go.Scatter(
                         x=komoditas_list, 
-                        y=std_npk_mid, 
-                        name='Standar', 
-                        marker_color='#388e3c'
+                        y=std_npk_max, 
+                        name='Batas Maksimal', 
+                        mode='lines+markers',
+                        line=dict(color='#d32f2f', width=3, dash='dash'),
+                        marker=dict(size=8, color='#d32f2f')
                     ))
                     fig.update_layout(
-                        title="NPK: Penggunaan Aktual vs Standar (kg/ha)", 
-                        barmode='group', 
+                        title="NPK: Penggunaan Aktual vs Batas Maksimal (kg/ha)", 
                         height=400,
                         xaxis_title="Komoditas",
-                        yaxis_title="kg/ha"
+                        yaxis_title="kg/ha",
+                        hovermode='x unified'
                     )
                     st.plotly_chart(fig, use_container_width=True)
                 
@@ -384,25 +460,27 @@ if page == "🏠 Dashboard Utama":
                     fig.add_trace(go.Bar(
                         x=komoditas_list, 
                         y=actual_organik, 
-                        name='Aktual', 
+                        name='Rata-rata Aktual', 
                         marker_color='#ffb74d'
                     ))
-                    fig.add_trace(go.Bar(
+                    fig.add_trace(go.Scatter(
                         x=komoditas_list, 
-                        y=std_organik_mid, 
-                        name='Standar', 
-                        marker_color='#f57c00'
+                        y=std_organik_max, 
+                        name='Batas Maksimal', 
+                        mode='lines+markers',
+                        line=dict(color='#d32f2f', width=3, dash='dash'),
+                        marker=dict(size=8, color='#d32f2f')
                     ))
                     fig.update_layout(
-                        title="Organik: Penggunaan Aktual vs Standar (kg/ha)", 
-                        barmode='group', 
+                        title="Organik: Penggunaan Aktual vs Batas Maksimal (kg/ha)", 
                         height=400,
                         xaxis_title="Komoditas",
-                        yaxis_title="kg/ha"
+                        yaxis_title="kg/ha",
+                        hovermode='x unified'
                     )
                     st.plotly_chart(fig, use_container_width=True)
     
-    st.markdown('<div class="section-header">📏 Analisis Luas Lahan & Intensitas Pupuk</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Analisis Luas Lahan & Intensitas Pupuk</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
@@ -424,17 +502,33 @@ if page == "🏠 Dashboard Utama":
                 df, 
                 x='Total_per_ha', 
                 nbins=30, 
-                title='Distribusi Intensitas Pupuk (kg/ha)',
+                title='Distribusi Intensitas Pupuk Total (kg/ha)',
                 color_discrete_sequence=['#4caf50']
             )
-            fig.update_layout(xaxis_title="Intensitas Pupuk (kg/ha)", yaxis_title="Jumlah Petani")
+            fig.update_layout(xaxis_title="Total Pupuk (kg/ha)", yaxis_title="Jumlah Petani")
             st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("""
+            ⚠️ **Visualisasi Total Pupuk per ha tidak tersedia**
+            
+            Kolom `Total_per_ha` tidak ditemukan dalam data. 
+            
+            **Penyebab:**
+            - Feature engineering belum menghasilkan kolom ini
+            - Pipeline belum dijalankan dengan versi terbaru
+            
+            **Solusi:**
+            Jalankan ulang pipeline:
+            \`\`\`
+            python main.py
+            \`\`\`
+            """)
 
 # ==========================================
 # PAGE 2: DATA EXPLORER (ENHANCED WITH VALIDATION)
 # ==========================================
-elif page == "📊 Data Explorer":
-    st.markdown('<div class="section-header">📊 Data Explorer</div>', unsafe_allow_html=True)
+elif page == "Data Explorer":
+    st.markdown('<div class="section-header">Data Explorer</div>', unsafe_allow_html=True)
     
     if df is None:
         st.error("❌ Data tidak tersedia")
@@ -442,7 +536,7 @@ elif page == "📊 Data Explorer":
     
     st.markdown("""
     <div class="info-box">
-    <strong>💡 Pahami Dulu:</strong><br>
+    <strong>Pahami Dulu:</strong><br>
     <ul style="margin: 10px 0; padding-left: 20px;">
         <li><strong>NORMAL</strong> = Mengikuti pola mayoritas petani dalam penggunaan total pupuk per jenis (bukan berarti benar/salah)</li>
         <li><strong>ANOMALI</strong> = Berbeda dari pola umum dalam penggunaan total pupuk per jenis (bukan pelanggaran)</li>
@@ -452,227 +546,206 @@ elif page == "📊 Data Explorer":
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3, col4, col5 = st.columns(5)
+    all_commodities_config = get_all_commodities_from_config()
+    if 'Komoditas' in df.columns:
+        data_commodities = set(df['Komoditas'].dropna().unique())
+        config_commodities = set(all_commodities_config)
+        
+        invalid_commodities = data_commodities - config_commodities
+        if invalid_commodities:
+            st.warning(f"""
+            **Perhatian:** Ada {len(invalid_commodities)} komoditas di data yang tidak ada di config:
+            **{', '.join(sorted(invalid_commodities))}**
+            
+            Komoditas valid hanya: **{', '.join(sorted(config_commodities))}**
+            
+            Data dengan komoditas tidak valid mungkin tidak ditampilkan dengan benar.
+            """)
+    
+    # Filter controls
+    st.markdown("### Filter Data")
+    
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        if 'Desa' in df.columns:
-            desa_options = ['Semua'] + sorted(df['Desa'].unique().tolist())
-            desa_filter = st.selectbox("🏘️ Desa", desa_options)
+        if 'Komoditas' in df.columns:
+            valid_commodities_in_data = [k for k in df['Komoditas'].dropna().unique() if k in all_commodities_config]
+            komoditas_options = ['Semua'] + sorted(valid_commodities_in_data)
+            selected_komoditas = st.selectbox("Komoditas", komoditas_options)
         else:
-            desa_filter = 'Semua'
+            st.warning("Kolom Komoditas tidak tersedia")
+            selected_komoditas = 'Semua'
     
     with col2:
-        if 'Komoditas' in df.columns:
-            komoditas_options = ['Semua'] + sorted(df['Komoditas'].unique().tolist())
-            komoditas_filter = st.selectbox("🌾 Komoditas", komoditas_options)
+        if 'Anomaly_Label' in df.columns:
+            anomaly_options = ['Semua'] + sorted(df['Anomaly_Label'].unique().tolist())
+            selected_anomaly = st.selectbox("Label Anomali", anomaly_options)
         else:
-            komoditas_filter = 'Semua'
+            selected_anomaly = 'Semua'
     
     with col3:
         if standards_enabled and 'Final_Status' in df.columns:
-            status_options = ['Semua', 'Normal', 'Underuse', 'Overuse']
-            status_filter = st.selectbox("📊 Status Pupuk", status_options)
+            status_options = ['Semua'] + sorted(df['Final_Status'].unique().tolist())
+            selected_status = st.selectbox("Status Standar", status_options)
         else:
-            status_filter = 'Semua'
-    
-    with col4:
-        if 'Anomaly_Label' in df.columns:
-            anomaly_options = ['Semua', 'Normal', 'Ringan', 'Berat']
-            anomaly_filter = st.selectbox("🔍 Anomali", anomaly_options)
-        else:
-            anomaly_filter = 'Semua'
-    
-    with col5:
-        if 'Prioritas' in df.columns:
-            priority_options = ['Semua', 'Tinggi', 'Sedang', 'Rendah']
-            priority_filter = st.selectbox("🎯 Prioritas", priority_options)
-        else:
-            priority_filter = 'Semua'
+            selected_status = 'Semua'
     
     # Apply filters
     df_filtered = df.copy()
     
-    if desa_filter != 'Semua' and 'Desa' in df.columns:
-        df_filtered = df_filtered[df_filtered['Desa'] == desa_filter]
+    if selected_komoditas != 'Semua' and 'Komoditas' in df.columns:
+        df_filtered = df_filtered[df_filtered['Komoditas'] == selected_komoditas]
     
-    if komoditas_filter != 'Semua' and 'Komoditas' in df.columns:
-        df_filtered = df_filtered[df_filtered['Komoditas'] == komoditas_filter]
+    if selected_anomaly != 'Semua' and 'Anomaly_Label' in df.columns:
+        df_filtered = df_filtered[df_filtered['Anomaly_Label'] == selected_anomaly]
     
-    if status_filter != 'Semua' and 'Final_Status' in df.columns:
-        df_filtered = df_filtered[df_filtered['Final_Status'] == status_filter]
+    if selected_status != 'Semua' and 'Final_Status' in df.columns:
+        df_filtered = df_filtered[df_filtered['Final_Status'] == selected_status]
     
-    if anomaly_filter != 'Semua' and 'Anomaly_Label' in df.columns:
-        df_filtered = df_filtered[df_filtered['Anomaly_Label'] == anomaly_filter]
+    if len(df_filtered) == 0:
+        st.warning("""
+        ⚠️ **Tidak ada data untuk kombinasi filter ini**
+        
+        Silakan ubah filter atau pilih 'Semua' untuk melihat data.
+        """)
+        st.stop()
     
-    if priority_filter != 'Semua' and 'Prioritas' in df.columns:
-        df_filtered = df_filtered[df_filtered['Prioritas'] == priority_filter]
-    
-    st.info(f"📊 Menampilkan {len(df_filtered):,} dari {len(df):,} petani")
-    
-    display_cols = [
-        'ID_Petani', 'Desa', 'Kelompok_Tani', 'Komoditas', 
-        'Luas_Tanah_ha', 'Total_Urea', 'Total_NPK', 'Total_Organik',
-        'Total_per_ha'
-    ]
-    
-    if standards_enabled and 'Final_Status' in df_filtered.columns:
-        display_cols.append('Final_Status')
-    
-    if 'Anomaly_Label' in df_filtered.columns:
-        display_cols.append('Anomaly_Label')
-    
-    if 'Prioritas' in df_filtered.columns:
-        display_cols.append('Prioritas')
-    
-    display_cols = [col for col in display_cols if col in df_filtered.columns]
-    
-    # Color highlighting
-    def highlight_status(row):
-        colors = []
-        for col in row.index:
-            if col == 'Final_Status':
-                if row[col] == 'Overuse':
-                    colors.append('background-color: #ffcdd2')
-                elif row[col] == 'Underuse':
-                    colors.append('background-color: #fff3e0')
-                else:
-                    colors.append('background-color: #c8e6c9')
-            elif col == 'Anomaly_Label':
-                if row[col] == 'Berat':
-                    colors.append('background-color: #ff8a80; font-weight: bold')
-                elif row[col] == 'Ringan':
-                    colors.append('background-color: #ffe0b2')
-                else:
-                    colors.append('')
-            elif col == 'Prioritas':
-                if row[col] == 'Tinggi':
-                    colors.append('background-color: #ff8a80; font-weight: bold')
-                elif row[col] == 'Sedang':
-                    colors.append('background-color: #ffe0b2')
-                else:
-                    colors.append('background-color: #c8e6c9')
-            else:
-                colors.append('')
-        return colors
-    
-    st.dataframe(
-        df_filtered[display_cols].style.apply(highlight_status, axis=1),
-        use_container_width=True, 
-        height=400
-    )
+    st.markdown(f"**Total data setelah filter:** {len(df_filtered):,} petani")
     
     st.markdown("---")
     
-    st.markdown('<div class="section-header">📈 POLA NORMAL KOMODITAS</div>', unsafe_allow_html=True)
+    st.markdown("### Tabel Data")
     
     st.markdown("""
     <div class="info-box">
-    <strong>❓ Yang Disebut "Normal" Itu Seperti Apa?</strong><br>
-    Normal = pola yang diikuti oleh mayoritas petani berdasarkan <strong>total penggunaan pupuk per jenis per hektar</strong>. 
-    Bukan berarti "benar", tapi ini cara kebanyakan petani menggunakan pupuk untuk komoditas tersebut.
+    <strong>Tabel Data Petani:</strong> Lihat detail lengkap setiap petani sebelum melihat visualisasi.
+    Tabel ini dapat diurutkan dengan klik header kolom.
     </div>
     """, unsafe_allow_html=True)
     
-    if 'Komoditas' in df.columns:
-        selected_komoditas = st.selectbox(
-            "Pilih Komoditas untuk Melihat Pola Normal:",
-            sorted(df['Komoditas'].unique().tolist())
-        )
-        
-        df_komoditas = df[df['Komoditas'] == selected_komoditas]
-        
-        # Validate data exists
-        if len(df_komoditas) == 0:
-            st.warning(f"⚠️ Tidak ada data untuk komoditas {selected_komoditas}")
-        else:
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                st.metric(
-                    "Jumlah Petani",
-                    f"{len(df_komoditas):,}",
-                    help="Jumlah petani yang menanam komoditas ini"
-                )
-            
-            with col2:
-                if 'Urea_per_ha' in df_komoditas.columns:
-                    median_urea = df_komoditas['Urea_per_ha'].median()
-                    st.metric(
-                        "Median Urea/ha",
-                        f"{median_urea:.1f} kg",
-                        help="Nilai tengah TOTAL Urea per hektar (semua musim tanam)"
-                    )
-            
-            with col3:
-                if 'NPK_per_ha' in df_komoditas.columns:
-                    median_npk = df_komoditas['NPK_per_ha'].median()
-                    st.metric(
-                        "Median NPK/ha",
-                        f"{median_npk:.1f} kg",
-                        help="Nilai tengah TOTAL NPK per hektar (semua musim tanam)"
-                    )
-            
-            with col4:
-                if 'Organik_per_ha' in df_komoditas.columns:
-                    median_organik = df_komoditas['Organik_per_ha'].median()
-                    st.metric(
-                        "Median Organik/ha",
-                        f"{median_organik:.1f} kg",
-                        help="Nilai tengah TOTAL pupuk Organik per hektar (semua musim tanam)"
-                    )
-            
-            st.markdown("#### 📊 Distribusi Total Penggunaan Pupuk per Hektar")
-            st.markdown("*Menampilkan total penggunaan pupuk per jenis (bukan per MT)*")
-            
-            has_data = False
-            fig = make_subplots(
-                rows=1, cols=3,
-                subplot_titles=('Total Urea (kg/ha)', 'Total NPK (kg/ha)', 'Total Organik (kg/ha)')
+    # Select relevant columns for display
+    table_columns = ['ID_Petani', 'Komoditas', 'Desa', 'Luas_Tanah_ha']
+    
+    # Add fertilizer columns
+    if 'Urea_per_ha' in df_filtered.columns:
+        table_columns.append('Urea_per_ha')
+    if 'NPK_per_ha' in df_filtered.columns:
+        table_columns.append('NPK_per_ha')
+    if 'Organik_per_ha' in df_filtered.columns:
+        table_columns.append('Organik_per_ha')
+    if 'Total_per_ha' in df_filtered.columns:
+        table_columns.append('Total_per_ha')
+    
+    # Add status columns
+    if 'Anomaly_Label' in df_filtered.columns:
+        table_columns.append('Anomaly_Label')
+    if standards_enabled and 'Final_Status' in df_filtered.columns:
+        table_columns.append('Final_Status')
+    
+    # Filter columns that exist
+    table_columns = [col for col in table_columns if col in df_filtered.columns]
+    
+    # Display table
+    df_table = df_filtered[table_columns].copy()
+    
+    # Format numeric columns for better readability
+    numeric_cols = ['Luas_Tanah_ha', 'Urea_per_ha', 'NPK_per_ha', 'Organik_per_ha', 'Total_per_ha']
+    for col in numeric_cols:
+        if col in df_table.columns:
+            df_table[col] = df_table[col].apply(lambda x: f"{x:.2f}" if pd.notna(x) else "N/A")
+    
+    st.dataframe(
+        df_table,
+        use_container_width=True,
+        hide_index=True,
+        height=400
+    )
+    
+    # Download button
+    csv = df_table.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="Download Data (CSV)",
+        data=csv,
+        file_name=f"data_explorer_{selected_komoditas}_{pd.Timestamp.now().strftime('%Y%m%d')}.csv",
+        mime="text/csv",
+    )
+    
+    st.markdown("---")
+    st.markdown("### Visualisasi Data")
+    
+    st.markdown("#### 1️⃣ Distribusi Total Pupuk per Hektar per Komoditas")
+    
+    if 'Komoditas' in df_filtered.columns and 'Total_per_ha' in df_filtered.columns:
+        # Validasi data tidak kosong
+        if df_filtered['Total_per_ha'].notna().sum() > 0:
+            fig = px.box(
+                df_filtered,
+                x='Komoditas',
+                y='Total_per_ha',
+                color='Komoditas',
+                title='Distribusi Total Pupuk per Hektar (Semua Jenis)',
+                labels={'Total_per_ha': 'Total Pupuk (kg/ha)', 'Komoditas': 'Komoditas'}
             )
+            fig.update_layout(showlegend=False, height=500)
+            st.plotly_chart(fig, use_container_width=True)
             
-            col_idx = 1
-            for pupuk, color in [('Urea', '#2196F3'), ('NPK', '#4CAF50'), ('Organik', '#FF9800')]:
-                col_name = f'{pupuk}_per_ha'
-                if col_name in df_komoditas.columns:
-                    data = df_komoditas[col_name].dropna()
-                    if len(data) > 0:
-                        has_data = True
-                        
-                        # Add boxplot
-                        fig.add_trace(
-                            go.Box(
-                                y=data,
-                                name=pupuk,
-                                marker_color=color,
-                                boxmean='sd'
-                            ),
-                            row=1, col=col_idx
-                        )
-                col_idx += 1
-            
-            if has_data:
-                fig.update_layout(
-                    title_text=f"Distribusi Total Pupuk per Hektar - {selected_komoditas}",
-                    showlegend=False,
-                    height=400
-                )
-                st.plotly_chart(fig, use_container_width=True)
-                
-                st.markdown("""
-                <div class="success-box">
-                <strong>💡 Cara Membaca:</strong> Kotak menunjukkan rentang normal (50% petani di tengah). 
-                Garis tengah = median (nilai tengah). Titik di luar kotak = outlier (berbeda dari mayoritas).
-                <br><br>
-                <strong>⚠️ Penting:</strong> Ini adalah TOTAL penggunaan pupuk per jenis (bukan per MT). 
-                Petani dengan total jauh dari median akan terdeteksi sebagai anomali.
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.warning("⚠️ Data pupuk per hektar tidak tersedia untuk visualisasi ini.")
+            st.markdown("""
+            <div class="info-box">
+            <strong>Cara Baca:</strong><br>
+            Grafik ini menunjukkan distribusi <strong>TOTAL pupuk per hektar</strong> (Urea + NPK + Organik) untuk setiap komoditas.
+            Box menunjukkan rentang nilai mayoritas, titik di luar box = outlier/anomali.
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.warning("⚠️ Data Total_per_ha kosong untuk filter ini")
+    else:
+        missing_cols = []
+        if 'Komoditas' not in df_filtered.columns:
+            missing_cols.append('Komoditas')
+        if 'Total_per_ha' not in df_filtered.columns:
+            missing_cols.append('Total_per_ha')
+        
+        st.error(f"""
+        ❌ **Visualisasi tidak dapat ditampilkan**
+        
+        Kolom yang hilang: {', '.join(missing_cols)}
+        
+        <strong>Solusi:</strong>
+        1. Pastikan data memiliki kolom Komoditas
+        2. Jalankan ulang pipeline untuk menghasilkan Total_per_ha:
+        \`\`\`
+        python main.py
+        \`\`\`
+        """)
     
     st.markdown("---")
     
-    st.markdown('<div class="section-header">🎯 POSISI PETANI TERHADAP POLA NORMAL</div>', unsafe_allow_html=True)
+    if standards_enabled and 'Final_Status' in df_filtered.columns and 'Komoditas' in df_filtered.columns:
+        st.markdown("#### 2️⃣ Status Penggunaan Pupuk per Komoditas (Standar Aktif)")
+        
+        if len(df_filtered) > 0:
+            status_by_commodity = df_filtered.groupby(['Komoditas', 'Final_Status']).size().reset_index(name='Jumlah')
+            
+            if len(status_by_commodity) > 0:
+                fig = px.bar(
+                    status_by_commodity,
+                    x='Komoditas',
+                    y='Jumlah',
+                    color='Final_Status',
+                    title='Status Penggunaan Pupuk per Komoditas',
+                    color_discrete_map={'Normal': '#4caf50', 'Underuse': '#ff9800', 'Overuse': '#f44336'},
+                    barmode='stack'
+                )
+                fig.update_layout(height=500)
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("ℹ️ Tidak ada data status untuk filter ini")
+        else:
+            st.warning("⚠️ Tidak ada data untuk ditampilkan")
+    
+    st.markdown("---")
+    
+    st.markdown('<div class="section-header">DETAIL LENGKAP PETANI INDIVIDUAL</div>', unsafe_allow_html=True)
     
     selected_id = st.selectbox(
         "Pilih ID Petani untuk Analisis Detail:",
@@ -683,13 +756,12 @@ elif page == "📊 Data Explorer":
         petani_data = df_filtered[df_filtered['ID_Petani'] == selected_id].iloc[0]
         komoditas_petani = petani_data.get('Komoditas', 'Unknown')
         
-        # Validate commodity exists
-        df_same_commodity = df[df['Komoditas'] == komoditas_petani]
+        df_same_commodity = df_filtered[df_filtered['Komoditas'] == komoditas_petani]
         
         if len(df_same_commodity) < 2:
             st.warning(f"⚠️ Tidak cukup data untuk perbandingan komoditas {komoditas_petani}")
         else:
-            st.markdown(f"### 📋 Detail: {selected_id} ({komoditas_petani})")
+            st.markdown(f"### 📋 Detail Petani: {selected_id} ({komoditas_petani})")
             
             col1, col2, col3 = st.columns(3)
             
@@ -710,7 +782,7 @@ elif page == "📊 Data Explorer":
                     st.write(f"Total Organik: {petani_data.get('Total_Organik', 0):.1f} kg")
             
             with col3:
-                st.markdown("**📊 Pupuk per Hektar**")
+                st.markdown("**Pupuk per Hektar**")
                 if 'Urea_per_ha' in petani_data.index:
                     st.write(f"Urea: {petani_data.get('Urea_per_ha', 0):.1f} kg/ha")
                 if 'NPK_per_ha' in petani_data.index:
@@ -720,293 +792,8 @@ elif page == "📊 Data Explorer":
             
             st.markdown("---")
             
-            st.markdown("#### 📊 Perbandingan dengan Median Komoditas")
-            st.markdown("*Membandingkan total penggunaan pupuk per hektar dengan mayoritas petani*")
-            
-            # Calculate median for commodity
-            pupuk_types = ['Urea', 'NPK', 'Organik']
-            petani_values = []
-            median_values = []
-            labels = []
-            
-            for pupuk in pupuk_types:
-                per_ha_col = f'{pupuk}_per_ha'
-                if per_ha_col in petani_data.index and per_ha_col in df_same_commodity.columns:
-                    petani_val = petani_data.get(per_ha_col, 0)
-                    median_val = df_same_commodity[per_ha_col].median()
-                    
-                    petani_values.append(petani_val)
-                    median_values.append(median_val)
-                    labels.append(f'{pupuk}\n(kg/ha)')
-            
-            if petani_values:
-                fig = go.Figure()
-                
-                fig.add_trace(go.Bar(
-                    x=labels,
-                    y=median_values,
-                    name=f'Median {komoditas_petani}',
-                    marker_color='#90CAF9',
-                    text=[f'{v:.1f}' for v in median_values],
-                    textposition='auto'
-                ))
-                
-                fig.add_trace(go.Bar(
-                    x=labels,
-                    y=petani_values,
-                    name=f'Petani {selected_id}',
-                    marker_color='#EF5350',
-                    text=[f'{v:.1f}' for v in petani_values],
-                    textposition='auto'
-                ))
-                
-                fig.update_layout(
-                    title=f'Petani vs Median - Total per Hektar',
-                    barmode='group',
-                    height=400,
-                    yaxis_title='Total Pupuk per Hektar (kg/ha)',
-                    xaxis_title='Jenis Pupuk'
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
-                
-                st.markdown("""
-                <div class="info-box">
-                <strong>💡 Interpretasi:</strong> Grafik ini menunjukkan posisi petani dibandingkan dengan 
-                pola umum (median) untuk <strong>total penggunaan pupuk per jenis</strong>. 
-                <br><br>
-                Jika nilai petani jauh berbeda dari median (baik lebih tinggi atau lebih rendah), 
-                maka akan terdeteksi sebagai anomali. <strong>Fokus pada total per jenis, bukan distribusi per MT.</strong>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Show anomaly status
-            if 'Anomaly_Label' in petani_data.index:
-                anomaly_label = petani_data.get('Anomaly_Label', 'Normal')
-                anomaly_score = petani_data.get('Anomaly_Score', 0.0)
-                
-                if anomaly_label == 'Anomali':
-                    st.error(f"⚠️ Status: **ANOMALI** (Skor: {anomaly_score:.3f})")
-                else:
-                    st.success(f"✅ Status: **NORMAL** (Skor: {anomaly_score:.3f})")
-                
-                # Get explanation
-                try:
-                    from src.anomaly_explain import get_anomaly_explanation
-                    explanation = get_anomaly_explanation(selected_id, df)
-                    
-                    st.markdown("#### 💡 Penjelasan Anomali")
-                    st.markdown(explanation['explanation_text'])
-                except Exception as e:
-                    st.warning(f"Tidak dapat memuat penjelasan detail: {e}")
-            
-            st.markdown("---")
-            
-            st.markdown("#### 📊 VISUALISASI 2: Total Pupuk per Ha (Petani vs Median)")
-            
-            comparison_data = []
-            pupuk_types = []
-            petani_values = []
-            median_values = []
-            
-            for pupuk in ['Urea', 'NPK', 'Organik']:
-                col_per_ha = f'{pupuk}_per_ha' # Use '_per_ha' for comparison
-                if col_per_ha in petani_data.index and col_per_ha in df_same_commodity.columns:
-                    petani_val = petani_data[col_per_ha]
-                    median_val = df_same_commodity[col_per_ha].median()
-                    
-                    # Validate values
-                    if pd.notna(petani_val) and pd.notna(median_val):
-                        pupuk_types.append(f'{pupuk}/ha')
-                        petani_values.append(petani_val)
-                        median_values.append(median_val)
-                        
-                        diff_pct = ((petani_val - median_val) / median_val * 100) if median_val > 0 else 0
-                        comparison_data.append({
-                            'Jenis Pupuk': f'{pupuk} per ha',
-                            'Petani': f"{petani_val:.1f} kg",
-                            'Median': f"{median_val:.1f} kg",
-                            'Selisih': f"{diff_pct:+.1f}%"
-                        })
-            
-            if comparison_data:
-                # Show table
-                comparison_df = pd.DataFrame(comparison_data)
-                st.dataframe(comparison_df, use_container_width=True, hide_index=True)
-                
-                # Show chart
-                fig_compare = go.Figure()
-                
-                fig_compare.add_trace(go.Bar(
-                    x=pupuk_types,
-                    y=petani_values,
-                    name=f'Petani {selected_id}',
-                    marker_color='#FF5722',
-                    text=[f'{v:.1f}' for v in petani_values],
-                    textposition='auto'
-                ))
-                
-                fig_compare.add_trace(go.Bar(
-                    x=pupuk_types,
-                    y=median_values,
-                    name=f'Median {komoditas_petani}',
-                    marker_color='#4CAF50',
-                    text=[f'{v:.1f}' for v in median_values],
-                    textposition='auto'
-                ))
-                
-                fig_compare.update_layout(
-                    title=f"Perbandingan Penggunaan Pupuk: Petani {selected_id} vs Median {komoditas_petani}",
-                    yaxis_title="kg/ha",
-                    barmode='group',
-                    height=450
-                )
-                
-                st.plotly_chart(fig_compare, use_container_width=True)
-                
-                # Generate contextual interpretation
-                interpretations = []
-                for i, data in enumerate(comparison_data):
-                    selisih_str = data['Selisih'].replace('%', '').replace('+', '')
-                    try:
-                        selisih_pct = float(selisih_str)
-                        pupuk_name = data['Jenis Pupuk'].split(' per')[0]
-                        
-                        if abs(selisih_pct) < 10:
-                            interpretations.append(f"✅ {pupuk_name}: Penggunaan sesuai pola normal (selisih {selisih_pct:+.1f}%)")
-                        elif selisih_pct > 30:
-                            interpretations.append(f"🔴 {pupuk_name}: Penggunaan JAUH LEBIH TINGGI dari median (+{selisih_pct:.1f}%)")
-                        elif selisih_pct < -30:
-                            interpretations.append(f"🟡 {pupuk_name}: Penggunaan JAUH LEBIH RENDAH dari median ({selisih_pct:.1f}%)")
-                        elif selisih_pct > 0:
-                            interpretations.append(f"🟠 {pupuk_name}: Sedikit lebih tinggi dari median (+{selisih_pct:.1f}%)")
-                        else:
-                            interpretations.append(f"🟠 {pupuk_name}: Sedikit lebih rendah dari median ({selisih_pct:.1f}%)")
-                    except:
-                        pass
-                
-                if interpretations:
-                    st.markdown("""
-                    <div class="info-box">
-                    <strong>💡 Interpretasi Grafik:</strong><br>
-                    {}
-                    </div>
-                    """.format('<br>'.join(interpretations)), unsafe_allow_html=True)
-            else:
-                st.warning("⚠️ Data pupuk per hektar tidak tersedia untuk perbandingan.")
-            
-            st.markdown("---")
-            
-            st.markdown("#### 📊 VISUALISASI 3: Distribusi Pupuk Sepanjang Musim Tanam (MT1-MT3)")
-            
-            mt_data = []
-            
-            for pupuk_type in ['Urea', 'NPK', 'Organik']:
-                mt1_col = f'{pupuk_type}_MT1'
-                mt2_col = f'{pupuk_type}_MT2'
-                mt3_col = f'{pupuk_type}_MT3'
-                
-                if all(col in petani_data.index for col in [mt1_col, mt2_col, mt3_col]):
-                    mt1_val = petani_data[mt1_col]
-                    mt2_val = petani_data[mt2_col]
-                    mt3_val = petani_data[mt3_col]
-                    
-                    # Validate values
-                    if pd.notna(mt1_val) and pd.notna(mt2_val) and pd.notna(mt3_val):
-                        mt_data.append({
-                            'Pupuk': pupuk_type,
-                            'MT1': mt1_val,
-                            'MT2': mt2_val,
-                            'MT3': mt3_val
-                        })
-            
-            if mt_data:
-                mt_df = pd.DataFrame(mt_data)
-                
-                # Show table first
-                st.dataframe(mt_df, use_container_width=True, hide_index=True)
-                
-                # Stacked bar chart
-                fig_mt = go.Figure()
-                
-                fig_mt.add_trace(go.Bar(
-                    name='MT1 (Musim Tanam 1)',
-                    x=mt_df['Pupuk'],
-                    y=mt_df['MT1'],
-                    marker_color='#42A5F5',
-                    text=mt_df['MT1'].apply(lambda x: f'{x:.1f}'),
-                    textposition='inside'
-                ))
-                
-                fig_mt.add_trace(go.Bar(
-                    name='MT2 (Musim Tanam 2)',
-                    x=mt_df['Pupuk'],
-                    y=mt_df['MT2'],
-                    marker_color='#66BB6A',
-                    text=mt_df['MT2'].apply(lambda x: f'{x:.1f}'),
-                    textposition='inside'
-                ))
-                
-                fig_mt.add_trace(go.Bar(
-                    name='MT3 (Musim Tanam 3)',
-                    x=mt_df['Pupuk'],
-                    y=mt_df['MT3'],
-                    marker_color='#FFA726',
-                    text=mt_df['MT3'].apply(lambda x: f'{x:.1f}'),
-                    textposition='inside'
-                ))
-                
-                fig_mt.update_layout(
-                    title=f"Distribusi Penggunaan Pupuk Sepanjang Musim Tanam - Petani {selected_id}",
-                    yaxis_title="kg",
-                    barmode='stack',
-                    height=450,
-                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                )
-                
-                st.plotly_chart(fig_mt, use_container_width=True)
-                
-                # Generate MT interpretation
-                total_by_mt = {
-                    'MT1': sum([d['MT1'] for d in mt_data]),
-                    'MT2': sum([d['MT2'] for d in mt_data]),
-                    'MT3': sum([d['MT3'] for d in mt_data])
-                }
-                
-                dominant_mt = max(total_by_mt, key=total_by_mt.get)
-                weakest_mt = min(total_by_mt, key=total_by_mt.get)
-                
-                # Check balance
-                max_mt_val = total_by_mt[dominant_mt]
-                min_mt_val = total_by_mt[weakest_mt]
-                
-                if max_mt_val > 0 and min_mt_val == 0:
-                    balance_status = "TIDAK SEIMBANG - Ada musim tanam yang tidak diberi pupuk sama sekali"
-                    balance_emoji = "🔴"
-                elif max_mt_val > 0 and (min_mt_val == 0 or (min_mt_val > 0 and (max_mt_val / min_mt_val) > 5)):
-                    balance_status = "KURANG SEIMBANG - Satu musim tanam mendominasi"
-                    balance_emoji = "🟡"
-                else:
-                    balance_status = "CUKUP SEIMBANG - Distribusi relatif merata"
-                    balance_emoji = "✅"
-                
-                st.markdown(f"""
-                <div class="info-box">
-                <strong>💡 Interpretasi Pola Musim Tanam:</strong><br>
-                • <strong>{dominant_mt}</strong> adalah periode dengan penggunaan pupuk TERTINGGI: {total_by_mt[dominant_mt]:.1f} kg total<br>
-                • <strong>{weakest_mt}</strong> adalah periode dengan penggunaan pupuk TERENDAH: {total_by_mt[weakest_mt]:.1f} kg total<br>
-                • {balance_emoji} Status Distribusi: <strong>{balance_status}</strong><br>
-                <br>
-                <em>Catatan:</em> Distribusi yang seimbang biasanya menunjukkan perawatan tanaman yang konsisten. 
-                Namun, beberapa komoditas memang memerlukan pemupukan intensif pada musim tertentu.
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.warning("⚠️ Data distribusi musim tanam (MT1-MT3) tidak tersedia.")
-            
-            st.markdown("---")
-            
-            st.markdown("#### 📊 VISUALISASI 4: Proporsi Jenis Pupuk (%)")
+            st.markdown("#### VISUALISASI 1: Proporsi Penggunaan Pupuk")
+            st.markdown("*Membandingkan komposisi pupuk dengan median komoditas*")
             
             total_urea = petani_data.get('Total_Urea', 0)
             total_npk = petani_data.get('Total_NPK', 0)
@@ -1018,433 +805,453 @@ elif page == "📊 Data Explorer":
                 prop_npk = (total_npk / total_all) * 100
                 prop_organik = (total_organik / total_all) * 100
                 
-                # Calculate median proportions for commodity
                 df_commodity_valid = df_same_commodity.copy()
-                df_commodity_valid['total_pupuk'] = (
-                    df_commodity_valid.get('Total_Urea', 0) + 
-                    df_commodity_valid.get('Total_NPK', 0) + 
-                    df_commodity_valid.get('Total_Organik', 0)
-                )
                 
-                df_commodity_valid = df_commodity_valid[df_commodity_valid['total_pupuk'] > 0]
-                
-                if len(df_commodity_valid) > 0:
-                    df_commodity_valid['Prop_Urea'] = (df_commodity_valid.get('Total_Urea', 0) / 
-                                                       df_commodity_valid['total_pupuk']) * 100
-                    df_commodity_valid['Prop_NPK'] = (df_commodity_valid.get('Total_NPK', 0) / 
-                                                      df_commodity_valid['total_pupuk']) * 100
-                    df_commodity_valid['Prop_Organik'] = (df_commodity_valid.get('Total_Organik', 0) / 
-                                                          df_commodity_valid['total_pupuk']) * 100
-                    
-                    median_prop_urea = df_commodity_valid['Prop_Urea'].median()
-                    median_prop_npk = df_commodity_valid['Prop_NPK'].median()
-                    median_prop_organik = df_commodity_valid['Prop_Organik'].median()
-                    
-                    categories = ['Urea', 'NPK', 'Organik']
-                    petani_props = [prop_urea, prop_npk, prop_organik]
-                    median_props = [median_prop_urea, median_prop_npk, median_prop_organik]
-                    
-                    # Show table
-                    prop_table = pd.DataFrame({
-                        'Jenis Pupuk': categories,
-                        f'Petani {selected_id} (%)': [f'{p:.1f}%' for p in petani_props],
-                        f'Median {komoditas_petani} (%)': [f'{p:.1f}%' for p in median_props]
-                    })
-                    st.dataframe(prop_table, use_container_width=True, hide_index=True)
-                    
-                    # Bar chart
-                    fig_prop = go.Figure()
-                    
-                    fig_prop.add_trace(go.Bar(
-                        x=categories,
-                        y=petani_props,
-                        name=f'Petani {selected_id}',
-                        marker_color='#FF5722',
-                        text=[f'{p:.1f}%' for p in petani_props],
-                        textposition='auto'
-                    ))
-                    
-                    fig_prop.add_trace(go.Bar(
-                        x=categories,
-                        y=median_props,
-                        name=f'Median {komoditas_petani}',
-                        marker_color='#4CAF50',
-                        text=[f'{p:.1f}%' for p in median_props],
-                        textposition='auto'
-                    ))
-                    
-                    fig_prop.update_layout(
-                        title="Komposisi Jenis Pupuk (%)",
-                        yaxis_title="Persentase (%)",
-                        barmode='group',
-                        height=450
+                # Check if Total columns exist
+                if all(col in df_commodity_valid.columns for col in ['Total_Urea', 'Total_NPK', 'Total_Organik']):
+                    df_commodity_valid['total_pupuk'] = (
+                        df_commodity_valid['Total_Urea'] + 
+                        df_commodity_valid['Total_NPK'] + 
+                        df_commodity_valid['Total_Organik']
                     )
                     
-                    st.plotly_chart(fig_prop, use_container_width=True)
+                    df_commodity_valid = df_commodity_valid[df_commodity_valid['total_pupuk'] > 0]
                     
-                    # Interpretation with specific insights
-                    prop_interpretations = []
-                    for i, pupuk in enumerate(categories):
-                        petani_p = petani_props[i]
-                        median_p = median_props[i]
-                        diff = petani_p - median_p
+                    if len(df_commodity_valid) > 0:
+                        df_commodity_valid['Prop_Urea'] = (df_commodity_valid['Total_Urea'] / 
+                                                           df_commodity_valid['total_pupuk']) * 100
+                        df_commodity_valid['Prop_NPK'] = (df_commodity_valid['Total_NPK'] / 
+                                                          df_commodity_valid['total_pupuk']) * 100
+                        df_commodity_valid['Prop_Organik'] = (df_commodity_valid['Total_Organik'] / 
+                                                              df_commodity_valid['total_pupuk']) * 100
                         
-                        if abs(diff) < 5:
-                            prop_interpretations.append(f"✅ {pupuk}: Proporsi sesuai median ({petani_p:.1f}% vs {median_p:.1f}%)")
-                        elif diff > 15:
-                            prop_interpretations.append(f"🔴 {pupuk}: Proporsi JAUH LEBIH TINGGI ({petani_p:.1f}% vs {median_p:.1f}%, selisih +{diff:.1f}%)")
-                        elif diff < -15:
-                            prop_interpretations.append(f"🟡 {pupuk}: Proporsi JAUH LEBIH RENDAH ({petani_p:.1f}% vs {median_p:.1f}%, selisih {diff:.1f}%)")
-                        elif diff > 0:
-                            prop_interpretations.append(f"🟠 {pupuk}: Sedikit lebih tinggi ({petani_p:.1f}% vs {median_p:.1f}%)")
-                        else:
-                            prop_interpretations.append(f"🟠 {pupuk}: Sedikit lebih rendah ({petani_p:.1f}% vs {median_p:.1f}%)")
-                    
-                    st.markdown(f"""
-                    <div class="info-box">
-                    <strong>💡 Interpretasi Komposisi Pupuk:</strong><br>
-                    {('<br>'.join(prop_interpretations))}<br>
-                    <br>
-                    <em>Total pupuk petani ini: {total_all:.1f} kg ({prop_urea:.1f}% Urea, {prop_npk:.1f}% NPK, {prop_organik:.1f}% Organik)</em>
-                    </div>
-                    """, unsafe_allow_html=True)
+                        median_prop_urea = df_commodity_valid['Prop_Urea'].median()
+                        median_prop_npk = df_commodity_valid['Prop_NPK'].median()
+                        median_prop_organik = df_commodity_valid['Prop_Organik'].median()
+                        
+                        categories = ['Urea', 'NPK', 'Organik']
+                        petani_props = [prop_urea, prop_npk, prop_organik]
+                        median_props = [median_prop_urea, median_prop_npk, median_prop_organik]
+                        
+                        fig_prop = go.Figure()
+                        
+                        fig_prop.add_trace(go.Bar(
+                            x=categories,
+                            y=median_props,
+                            name=f'Median {komoditas_petani}',
+                            marker_color='#42A5F5',
+                            text=[f'{v:.1f}%' for v in median_props],
+                            textposition='auto'
+                        ))
+                        
+                        fig_prop.add_trace(go.Bar(
+                            x=categories,
+                            y=petani_props,
+                            name=f'Petani {selected_id}',
+                            marker_color='#FF7043',
+                            text=[f'{v:.1f}%' for v in petani_props],
+                            textposition='auto'
+                        ))
+                        
+                        fig_prop.update_layout(
+                            title=f'Proporsi Penggunaan Pupuk (%)',
+                            barmode='group',
+                            height=400,
+                            yaxis_title='Proporsi (%)',
+                            xaxis_title='Jenis Pupuk',
+                            yaxis=dict(range=[0, 100])
+                        )
+                        
+                        st.plotly_chart(fig_prop, use_container_width=True)
+                        
+                        st.markdown("""
+                        <div class="info-box">
+                        <strong>Interpretasi:</strong> Grafik ini menunjukkan komposisi penggunaan pupuk petani 
+                        dibandingkan dengan pola umum (median). Jika distribusi sangat berbeda dari median, 
+                        maka akan terdeteksi sebagai anomali.
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.warning("Tidak cukup data untuk menghitung proporsi median komoditas.")
                 else:
-                    st.warning("⚠️ Tidak cukup data komoditas untuk perbandingan proporsi.")
+                    st.warning("Kolom Total_Urea, Total_NPK, atau Total_Organik tidak tersedia dalam dataset.")
             else:
-                st.warning("⚠️ Total pupuk petani ini adalah 0, tidak dapat menghitung proporsi.")
+                st.warning("Total pupuk petani adalah 0, tidak dapat menghitung proporsi.")
+            
+            # Show anomaly status
+            if 'Anomaly_Label' in petani_data.index:
+                anomaly_label = petani_data.get('Anomaly_Label', 'Normal')
+                anomaly_score = petani_data.get('Anomaly_Score', 0.0)
+                
+                if anomaly_label == 'Anomali':
+                    st.error(f"⚠️ Status: **ANOMALI** (Skor: {anomaly_score:.3f})")
+                else:
+                    st.success(f"✅ Status: **NORMAL** (Skor: {anomaly_score:.3f})")
+                
+                try:
+                    from src.anomaly_explain import get_anomaly_explanation
+                    explanation = get_anomaly_explanation(selected_id, df_filtered, standards_manager)
+                    
+                    st.markdown("#### Penjelasan Anomali")
+                    st.markdown(explanation['explanation_text'])
+                except Exception as e:
+                    st.warning(f"Tidak dapat memuat penjelasan detail: {e}")
             
             st.markdown("---")
             
-            st.markdown("#### 📊 VISUALISASI 5: TINGKAT ANOMALI & PENJELASAN")
+            st.markdown("#### VISUALISASI 2: Total Pupuk (kg) - Petani vs Median")
+            st.markdown("*Membandingkan total penggunaan pupuk dengan pola mayoritas petani*")
             
-            st.markdown("""
-            <div class="info-box">
-            <strong>📚 Ingat:</strong> Anomali ≠ Kesalahan. Anomali hanya berarti "berbeda dari pola mayoritas". 
-            Bisa jadi petani ini lebih baik, atau memiliki kondisi lahan yang unik.
-            </div>
+            comparison_data = []
+            pupuk_types_viz2 = []
+            petani_values_viz2 = []
+            median_values_viz2 = []
+            
+            for pupuk in ['Urea', 'NPK', 'Organik']:
+                col_total = f'Total_{pupuk}'
+                if col_total in petani_data.index and col_total in df_same_commodity.columns:
+                    petani_val = petani_data[col_total]
+                    median_val = df_same_commodity[col_total].median()
+                    
+                    # Validate values
+                    if pd.notna(petani_val):
+                        if pd.isna(median_val):
+                            median_val = 0.0
+                        
+                        pupuk_types_viz2.append(f'{pupuk}')
+                        petani_values_viz2.append(petani_val)
+                        median_values_viz2.append(median_val)
+                        
+                        if median_val > 0:
+                            diff_pct = ((petani_val - median_val) / median_val * 100)
+                        else:
+                            # If median is 0 but petani value exists, it's infinite difference
+                            if petani_val > 0:
+                                diff_pct = 999.9  # Indicate very large positive difference
+                            else:
+                                diff_pct = 0.0
+                        
+                        comparison_data.append({
+                            'Jenis Pupuk': pupuk,
+                            'Petani': f"{petani_val:.1f} kg",
+                            'Median': f"{median_val:.1f} kg",
+                            'Selisih': f"{diff_pct:+.1f}%" if diff_pct < 999 else ">>100%"
+                        })
+            
+            if comparison_data:
+                # Show table
+                comparison_df = pd.DataFrame(comparison_data)
+                st.dataframe(comparison_df, use_container_width=True, hide_index=True)
+                
+                # Show chart
+                fig_compare = go.Figure()
+                
+                fig_compare.add_trace(go.Bar(
+                    x=pupuk_types_viz2,
+                    y=petani_values_viz2,
+                    name=f'Petani {selected_id}',
+                    marker_color='#FF5722',
+                    text=[f'{v:.1f}' for v in petani_values_viz2],
+                    textposition='auto'
+                ))
+                
+                fig_compare.add_trace(go.Bar(
+                    x=pupuk_types_viz2,
+                    y=median_values_viz2,
+                    name=f'Median {komoditas_petani}',
+                    marker_color='#4CAF50',
+                    text=[f'{v:.1f}' for v in median_values_viz2],
+                    textposition='auto'
+                ))
+                
+                fig_compare.update_layout(
+                    title=f"Perbandingan Total Pupuk: Petani {selected_id} vs Median {komoditas_petani}",
+                    yaxis_title="Total Pupuk (kg)",
+                    barmode='group',
+                    height=450
+                )
+                
+                st.plotly_chart(fig_compare, use_container_width=True)
+                
+                interpretations = []
+                for i, data in enumerate(comparison_data):
+                    selisih_str = data['Selisih'].replace('%', '').replace('+', '').strip()
+                    try:
+                        pupuk_name = data['Jenis Pupuk']
+                        
+                        # Handle special case for very large differences
+                        if selisih_str == ">>100":
+                            interpretations.append(f"🔴 {pupuk_name}: Penggunaan JAUH LEBIH TINGGI dari median (median = 0, petani menggunakan pupuk ini)")
+                        else:
+                            selisih_pct = float(selisih_str)
+                            
+                            if abs(selisih_pct) < 10:
+                                interpretations.append(f"✅ {pupuk_name}: Penggunaan sesuai pola normal (selisih {selisih_pct:+.1f}%)")
+                            elif selisih_pct > 30:
+                                interpretations.append(f"🔴 {pupuk_name}: Penggunaan JAUH LEBIH TINGGI dari median (+{selisih_pct:.1f}%)")
+                            elif selisih_pct < -30:
+                                interpretations.append(f"🟡 {pupuk_name}: Penggunaan JAUH LEBIH RENDAH dari median ({selisih_pct:.1f}%)")
+                            elif selisih_pct > 0:
+                                interpretations.append(f"🟠 {pupuk_name}: Sedikit lebih tinggi dari median (+{selisih_pct:.1f}%)")
+                            else:
+                                interpretations.append(f"🟠 {pupuk_name}: Sedikit lebih rendah dari median ({selisih_pct:.1f}%)")
+                    except Exception as e:
+                        interpretations.append(f"⚠️ {pupuk_name}: Tidak dapat menghitung interpretasi")
+                
+                st.markdown("""
+                <div class="info-box">
+                <strong>Interpretasi Grafik:</strong><br>
+                {}
+                </div>
+                """.format('<br>'.join(interpretations)), unsafe_allow_html=True)
+            else:
+                st.warning("⚠️ Data Total pupuk tidak tersedia untuk perbandingan.")
+
+            st.markdown("---")
+            
+            if standards_enabled:
+                st.markdown("#### VISUALISASI 3: Perbandingan dengan Standar Pupuk")
+                st.markdown("*Membandingkan penggunaan aktual dengan batas maksimal standar*")
+                
+                std = standards_manager.get_standard(komoditas_petani)
+                
+                if std:
+                    pupuk_types_std = []
+                    petani_values_std = []
+                    std_max_values = []
+                    
+                    for pupuk in ['Urea', 'NPK', 'Organik']:
+                        col_per_ha = f'{pupuk}_per_ha'
+                        if col_per_ha in petani_data.index and pupuk in std:
+                            petani_val = petani_data[col_per_ha]
+                            std_max = std[pupuk]['max']
+                            
+                            if pd.notna(petani_val):
+                                pupuk_types_std.append(f'{pupuk}/ha')
+                                petani_values_std.append(petani_val)
+                                std_max_values.append(std_max)
+                    
+                    if pupuk_types_std:
+                        fig_std = go.Figure()
+                        
+                        fig_std.add_trace(go.Bar(
+                            x=pupuk_types_std,
+                            y=petani_values_std,
+                            name=f'Petani {selected_id}',
+                            marker_color='#2196F3',
+                            text=[f'{v:.1f}' for v in petani_values_std],
+                            textposition='auto'
+                        ))
+                        
+                        fig_std.add_trace(go.Scatter(
+                            x=pupuk_types_std,
+                            y=std_max_values,
+                            name='Batas Maksimal',
+                            mode='lines+markers',
+                            line=dict(color='#F44336', width=3, dash='dash'),
+                            marker=dict(size=10, color='#F44336'),
+                            text=[f'{v:.1f}' for v in std_max_values],
+                            textposition='top center'
+                        ))
+                        
+                        fig_std.update_layout(
+                            title=f"Penggunaan Aktual vs Batas Maksimal Standar",
+                            yaxis_title="kg/ha",
+                            height=450,
+                            hovermode='x unified'
+                        )
+                        
+                        st.plotly_chart(fig_std, use_container_width=True)
+                        
+                        st.markdown("""
+                        <div class="info-box">
+                        <strong>📌 Interpretasi:</strong> Garis merah putus-putus menunjukkan <strong>batas maksimal</strong> 
+                        penggunaan pupuk berdasarkan standar. Jika bar biru melebihi garis merah, maka terjadi overuse.
+                        <br><br>
+                        <strong>Catatan:</strong> Standar adalah batas atas, bukan target. Penggunaan di bawah batas adalah normal.
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Show status for each fertilizer type
+                        col1, col2, col3 = st.columns(3)
+                        
+                        for i, pupuk in enumerate(['Urea', 'NPK', 'Organik']):
+                            col_per_ha = f'{pupuk}_per_ha'
+                            status_col = f'Status_{pupuk}'
+                            
+                            if status_col in petani_data.index:
+                                status = petani_data[status_col]
+                                
+                                with [col1, col2, col3][i]:
+                                    if status == 'Overuse':
+                                        st.markdown(f'<div class="danger-box"><strong>🌾 {pupuk}:</strong> Overuse 🚨<br>Melebihi batas standar</div>', unsafe_allow_html=True)
+                                    elif status == 'Underuse':
+                                        st.markdown(f'<div class="warning-box"><strong>🌾 {pupuk}:</strong> Underuse ⚠️<br>Di bawah standar minimal</div>', unsafe_allow_html=True)
+                                    else:
+                                        st.markdown(f'<div class="success-box"><strong>🌾 {pupuk}:</strong> Normal ✅<br>Sesuai standar</div>', unsafe_allow_html=True)
+                    else:
+                        st.info("ℹ️ Data pupuk per hektar tidak tersedia untuk perbandingan standar")
+                else:
+                    st.warning(f"⚠️ Standar pupuk tidak ditemukan untuk komoditas {komoditas_petani}")
+    
+    # Create tabs for different visualizations
+    viz_tab1, viz_tab2, viz_tab3, viz_tab4 = st.tabs([
+        "1. Distribusi Pupuk per Hektar", 
+        "2. Lokasi & Intensitas", 
+        "3. Persebaran per Desa", 
+        "4. Boxplot Detail Pupuk"
+    ])
+    
+    with viz_tab1:
+        st.markdown("#### Distribusi Pupuk per Hektar (Seluruh Jenis)")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if 'Urea_per_ha' in df_filtered.columns:
+                fig = px.box(
+                    df_filtered,
+                    x='Komoditas',
+                    y='Urea_per_ha',
+                    title='Urea (kg/ha)',
+                    color='Komoditas',
+                    points='outliers'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            if 'NPK_per_ha' in df_filtered.columns:
+                fig = px.box(
+                    df_filtered,
+                    x='Komoditas',
+                    y='NPK_per_ha',
+                    title='NPK (kg/ha)',
+                    color='Komoditas',
+                    points='outliers'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        
+        if 'Organik_per_ha' in df_filtered.columns:
+            fig = px.box(
+                df_filtered,
+                x='Komoditas',
+                y='Organik_per_ha',
+                title='Organik (kg/ha)',
+                color='Komoditas',
+                points='outliers'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+    
+    with viz_tab2:
+        st.markdown(f"""
+        <strong>Lokasi Geografis & Intensitas Penggunaan Pupuk:</strong><br>
+        Visualisasi ini membantu melihat pola spasial penggunaan pupuk.
+        Titik yang lebih besar menandakan total pupuk yang digunakan lebih banyak.
+        """, unsafe_allow_html=True)
+        
+        if all(col in df_filtered.columns for col in ['Luas_Tanah_ha', 'Total_per_ha', 'Cluster_ID']):
+            fig = px.scatter(
+                df_filtered,
+                x='Luas_Tanah_ha',
+                y='Total_per_ha',
+                color='Cluster_ID' if 'Cluster_ID' in df_filtered.columns else None,
+                title='Intensitas Pupuk vs Luas Lahan per Cluster',
+                labels={'Luas_Tanah_ha': 'Luas Lahan (ha)', 'Total_per_ha': 'Total Pupuk (kg)'},
+                size='Total_Pupuk' if 'Total_Pupuk' in df_filtered.columns else 10,
+                size_max=15,
+                hover_data=['ID_Petani', 'Komoditas', 'Desa'] if all(col in df_filtered.columns for col in ['ID_Petani', 'Komoditas', 'Desa']) else None
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("⚠️ Data lokasi dan intensitas pupuk tidak lengkap untuk visualisasi ini.")
+    
+    with viz_tab3:
+        if 'Desa' in df_filtered.columns:
+            st.markdown(f"""
+            <strong>Penjelasan:</strong> Distribusi petani dan penggunaan pupuk per desa. 
+            Membantu identifikasi desa yang perlu perhatian khusus.
             """, unsafe_allow_html=True)
             
-            anomaly_label = petani_data.get('Anomaly_Label', 'Unknown')
-            anomaly_score = petani_data.get('anomaly_score', petani_data.get('Anomaly_Score', 0)) # Fallback for different naming conventions
+            col1, col2 = st.columns(2)
             
-            # Create visualization of anomaly level
-            col1, col2, col3 = st.columns([1,2,1])
+            with col1:
+                petani_by_desa = df_filtered['Desa'].value_counts().reset_index()
+                petani_by_desa.columns = ['Desa', 'Jumlah']
+                fig = px.pie(
+                    petani_by_desa,
+                    values='Jumlah',
+                    names='Desa',
+                    title='Distribusi Petani per Desa'
+                )
+                st.plotly_chart(fig, use_container_width=True)
             
             with col2:
-                if anomaly_label == 'Normal':
-                    st.markdown("""
-                    <div style="background-color: #4CAF50; color: white; padding: 30px; border-radius: 10px; text-align: center;">
-                        <h2 style="margin: 0;">✅ NORMAL</h2>
-                        <p style="margin: 10px 0 0 0; font-size: 18px;">Pola Mengikuti Mayoritas</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                elif anomaly_label == 'Ringan':
-                    st.markdown("""
-                    <div style="background-color: #FF9800; color: white; padding: 30px; border-radius: 10px; text-align: center;">
-                        <h2 style="margin: 0;">⚠️ ANOMALI RINGAN</h2>
-                        <p style="margin: 10px 0 0 0; font-size: 18px;">Sedikit Berbeda dari Mayoritas</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:  # Berat
-                    st.markdown("""
-                    <div style="background-color: #F44336; color: white; padding: 30px; border-radius: 10px; text-align: center;">
-                        <h2 style="margin: 0;">🚨 ANOMALI BERAT</h2>
-                        <p style="margin: 10px 0 0 0; font-size: 18px;">Sangat Berbeda dari Mayoritas</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            # Show anomaly score if available
-            if pd.notna(anomaly_score):
-                st.metric("Skor Anomali (dari model ML)", f"{anomaly_score:.4f}", 
-                         help="Skor dari Isolation Forest. Nilai negatif = anomali, semakin negatif semakin anomali.")
-            
-            # SPECIFIC EXPLANATION WITH EVIDENCE
-            if anomaly_label == 'Normal':
-                st.success(f"✅ Petani {selected_id} memiliki pola penggunaan pupuk yang NORMAL")
-                st.markdown("""
-                <strong>Artinya:</strong> Pola penggunaan pupuk petani ini serupa dengan kebanyakan petani lain yang menanam komoditas yang sama.
-                Tidak ada yang mencurigakan atau sangat berbeda dari pola umum.
-                """)
-            else:
-                anomaly_factors = []
-                
-                # SPECIFIC FACTOR 1: Check extreme per ha values
-                for pupuk in ['Urea', 'NPK', 'Organik']:
-                    col_per_ha = f'{pupuk}_per_ha' # Use '_per_ha' for comparison
-                    if col_per_ha in petani_data.index and col_per_ha in df_same_commodity.columns:
-                        petani_val = petani_data[col_per_ha]
-                        median_val = df_same_commodity[col_per_ha].median()
-                        
-                        if pd.notna(petani_val) and pd.notna(median_val) and median_val > 0:
-                            diff_pct = ((petani_val - median_val) / median_val) * 100
-                            
-                            if abs(diff_pct) > 50:
-                                anomaly_factors.append(
-                                    f"<strong>{pupuk} per ha sangat tinggi</strong>: Petani menggunakan {petani_val:.1f} kg/ha, "
-                                    f"sedangkan median komoditas ini hanya {median_val:.1f} kg/ha. "
-                                    f"Selisih {abs(diff_pct):.1f}% lebih tinggi dari pola umum. "
-                                    f"(lihat grafik Visualisasi 2 di atas)"
-                                )
-                
-                # SPECIFIC FACTOR 2: Check MT distribution imbalance
-                if mt_data and len(mt_data) > 0:
-                    for pupuk_mt in mt_data:
-                        pupuk_name = pupuk_mt['Pupuk']
-                        mt_values = [pupuk_mt['MT1'], pupuk_mt['MT2'], pupuk_mt['MT3']]
-                        max_mt_val = max(mt_values)
-                        min_mt_val = min(mt_values)
-                        
-                        if max_mt_val > 0:
-                            if min_mt_val == 0 and max_mt_val > 50:
-                                anomaly_factors.append(
-                                    f"**Distribusi {pupuk_name} tidak seimbang**: Ada musim tanam yang tidak diberi {pupuk_name} "
-                                    f"(0 kg), sementara musim lain mendapat {max_mt_val:.1f} kg. "
-                                    f"Pola ini jarang ditemukan. (lihat grafik Visualisasi 3 di atas)"
-                                )
-                            elif min_mt_val > 0 and (max_mt_val / min_mt_val) > 10:
-                                anomaly_factors.append(
-                                    f"**Distribusi {pupuk_name} sangat timpang**: Musim tanam tertinggi ({max_mt_val:.1f} kg) "
-                                    f"lebih dari 10x lebih besar dari terendah ({min_mt_val:.1f} kg). "
-                                    f"(lihat grafik Visualisasi 3 di atas)"
-                                )
-                
-                # SPECIFIC FACTOR 3: Check proportion imbalance
-                if total_all > 0:
-                    if prop_urea > 80:
-                        anomaly_factors.append(
-                            f"**Proporsi Urea terlalu dominan**: {prop_urea:.1f}% dari total pupuk adalah Urea. "
-                            f"Pola ini jarang - kebanyakan petani menggunakan campuran lebih seimbang. "
-                            f"(lihat grafik Visualisasi 4 di atas)"
-                        )
-                    elif prop_organik > 70:
-                        anomaly_factors.append(
-                            f"**Proporsi Organik sangat tinggi**: {prop_organik:.1f}% dari total pupuk adalah Organik. "
-                            f"Ini tidak umum untuk komoditas {komoditas_petani}. "
-                            f"(lihat grafik Visualisasi 4 di atas)"
-                        )
-                
-                # SPECIFIC FACTOR 4: Check luas lahan
-                luas_ha = petani_data.get('Luas_Tanah_ha', 0)
-                if 'Luas_Tanah_ha' in df_same_commodity.columns:
-                    median_luas = df_same_commodity['Luas_Tanah_ha'].median()
-                    
-                    if luas_ha > 0 and median_luas > 0:
-                        luas_diff_pct = ((luas_ha - median_luas) / median_luas) * 100
-                        if abs(luas_diff_pct) > 100:
-                            if luas_diff_pct > 0:
-                                anomaly_factors.append(
-                                    f"**Luas lahan sangat besar**: Petani memiliki {luas_ha:.2f} ha, "
-                                    f"{abs(luas_diff_pct):.1f}% lebih besar dari median ({median_luas:.2f} ha). "
-                                    f"Lahan yang sangat besar bisa menghasilkan pola pupuk yang berbeda."
-                                )
-                            else:
-                                anomaly_factors.append(
-                                    f"**Luas lahan sangat kecil**: Petani memiliki {luas_ha:.2f} ha, "
-                                    f"{abs(luas_diff_pct):.1f}% lebih kecil dari median ({median_luas:.2f} ha). "
-                                    f"Lahan yang sangat kecil bisa menghasilkan pola pupuk yang unik."
-                                )
-                
-                # Display findings
-                if anomaly_label == 'Berat':
-                    st.error(f"🚨 Petani {selected_id} terdeteksi sebagai ANOMALI BERAT")
-                else:
-                    st.warning(f"⚠️ Petani {selected_id} terdeteksi sebagai ANOMALI RINGAN")
-                
-                st.markdown("**Ringkasan:** Pola penggunaan pupuk petani ini berbeda signifikan dari mayoritas petani lain.")
-                
-                if anomaly_factors:
-                    st.markdown("**Faktor Spesifik yang Menyebabkan Status Anomali:**")
-                    for i, factor in enumerate(anomaly_factors[:3], 1):
-                        st.markdown(f"{i}. {factor}")
-                else:
-                    st.markdown("**Faktor Utama:**")
-                    st.markdown(
-                        "- Kombinasi berbagai fitur pupuk (dosis, proporsi, distribusi MT) yang jarang ditemukan pada petani lain. "
-                        "Meskipun tidak ada satu faktor yang ekstrem, kombinasi keseluruhan menciptakan pola unik yang berbeda dari mayoritas."
-                    )
-                
-                st.markdown("""
-                <div class="warning-box">
-                <strong>⚠️ Perlu Evaluasi Lebih Lanjut:</strong><br>
-                Anomali tidak selalu berarti buruk. Bisa jadi:
-                <ul>
-                    <li>✅ Kondisi lahan memang berbeda (tanah lebih subur/kurang subur)</li>
-                    <li>✅ Petani menggunakan teknik khusus yang lebih efisien</li>
-                    <li>⚠️ Ada kesalahan pencatatan data yang perlu diperbaiki</li>
-                    <li>⚠️ Praktik yang perlu dievaluasi dan disesuaikan</li>
-                </ul>
-                <strong>Rekomendasi:</strong> Lakukan verifikasi lapangan untuk memastikan penyebab pola anomali ini.
-                </div>
-                """, unsafe_allow_html=True)
-    
-        st.markdown("---")
-        
-        csv = df_filtered.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="⬇️ Download Data (CSV)",
-            data=csv,
-            file_name=f"rdkk_filtered_data.csv",
-            mime="text/csv",
-        )
-        
-        st.markdown("---")
-        st.markdown("### 📈 Visualisasi Data")
-        
-        viz_tab1, viz_tab2, viz_tab3, viz_tab4 = st.tabs([
-            "📊 Distribusi Status", 
-            "🌾 Per Komoditas", 
-            "📍 Per Desa",
-            "📦 Boxplot Pupuk"
-        ])
-        
-        with viz_tab1:
-            if standards_enabled and 'Final_Status' in df_filtered.columns:
-                st.markdown("""
-                <strong>Penjelasan:</strong> Grafik ini menunjukkan distribusi status penggunaan pupuk. 
-                - <strong>Normal</strong>: Penggunaan sesuai standar
-                - <strong>Underuse</strong>: Penggunaan di bawah standar (mungkin hasil kurang optimal)
-                - <strong>Overuse</strong>: Penggunaan melebihi standar (pemborosan subsidi)
-                """)
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    status_counts = df_filtered['Final_Status'].value_counts()
-                    fig = px.pie(
-                        values=status_counts.values,
-                        names=status_counts.index,
-                        title='Distribusi Status Pupuk',
-                        color=status_counts.index,
-                        color_discrete_map={'Normal': '#4caf50', 'Underuse': '#ff9800', 'Overuse': '#f44336'},
-                        hole=0.4
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-                
-                with col2:
-                    status_bar = df_filtered['Final_Status'].value_counts().reset_index()
-                    status_bar.columns = ['Status', 'Jumlah']
+                if 'Total_per_ha' in df_filtered.columns:
+                    pupuk_by_desa = df_filtered.groupby('Desa')['Total_per_ha'].mean().reset_index()
                     fig = px.bar(
-                        status_bar,
-                        x='Status',
-                        y='Jumlah',
-                        title='Jumlah Petani per Status',
-                        color='Status',
-                        color_discrete_map={'Normal': '#4caf50', 'Underuse': '#ff9800', 'Overuse': '#f44336'}
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-        
-        with viz_tab2:
-            st.markdown("""
-            <strong>Penjelasan:</strong> Analisis penggunaan pupuk berdasarkan jenis komoditas. 
-            Setiap komoditas memiliki kebutuhan pupuk berbeda.
-            """)
-            
-            if 'Komoditas' in df_filtered.columns and 'Total_per_ha' in df_filtered.columns:
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    pupuk_by_komoditas = df_filtered.groupby('Komoditas')['Total_per_ha'].mean().reset_index()
-                    fig = px.bar(
-                        pupuk_by_komoditas,
-                        x='Komoditas',
+                        pupuk_by_desa,
+                        x='Desa',
                         y='Total_per_ha',
-                        title='Rata-rata Intensitas Pupuk per Komoditas (kg/ha)',
+                        title='Rata-rata Intensitas Pupuk per Desa (kg/ha)',
                         color='Total_per_ha',
-                        color_continuous_scale='Greens'
+                        color_continuous_scale='Blues'
                     )
                     st.plotly_chart(fig, use_container_width=True)
-                
-                with col2:
-                    if standards_enabled and 'Final_Status' in df_filtered.columns:
-                        status_by_commodity = df_filtered.groupby(['Komoditas', 'Final_Status']).size().reset_index(name='Jumlah')
-                        fig = px.bar(
-                            status_by_commodity,
-                            x='Komoditas',
-                            y='Jumlah',
-                            color='Final_Status',
-                            title='Status per Komoditas',
-                            color_discrete_map={'Normal': '#4caf50', 'Underuse': '#ff9800', 'Overuse': '#f44336'},
-                            barmode='stack'
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+    
+    with viz_tab4:
+        st.markdown(f"""
+        <strong>Penjelasan:</strong> Boxplot menunjukkan distribusi, median, dan outlier (nilai ekstrem) penggunaan pupuk.
+        - <strong>Kotak</strong>: 50% data tengah
+        - <strong>Garis tengah</strong>: Median (nilai tengah)
+        - <strong>Titik di luar</strong>: Outlier (anomali potensial)
+        """, unsafe_allow_html=True)
         
-        with viz_tab3:
-            if 'Desa' in df_filtered.columns:
-                st.markdown("""
-                <strong>Penjelasan:</strong> Distribusi petani dan penggunaan pupuk per desa. 
-                Membantu identifikasi desa yang perlu perhatian khusus.
-                """)
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    petani_by_desa = df_filtered['Desa'].value_counts().reset_index()
-                    petani_by_desa.columns = ['Desa', 'Jumlah']
-                    fig = px.pie(
-                        petani_by_desa,
-                        values='Jumlah',
-                        names='Desa',
-                        title='Distribusi Petani per Desa'
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-                
-                with col2:
-                    if 'Total_per_ha' in df_filtered.columns:
-                        pupuk_by_desa = df_filtered.groupby('Desa')['Total_per_ha'].mean().reset_index()
-                        fig = px.bar(
-                            pupuk_by_desa,
-                            x='Desa',
-                            y='Total_per_ha',
-                            title='Rata-rata Intensitas Pupuk per Desa (kg/ha)',
-                            color='Total_per_ha',
-                            color_continuous_scale='Blues'
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-        
-        with viz_tab4:
-            st.markdown("""
-            <strong>Penjelasan:</strong> Boxplot menunjukkan distribusi, median, dan outlier (nilai ekstrem) penggunaan pupuk.
-            - <strong>Kotak</strong>: 50% data tengah
-            - <strong>Garis tengah</strong>: Median (nilai tengah)
-            - <strong>Titik di luar</strong>: Outlier (anomali potensial)
-            """)
+        if all(col in df_filtered.columns for col in ['Urea_per_ha', 'NPK_per_ha', 'Organik_per_ha', 'Komoditas']):
+            col1, col2 = st.columns(2)
             
-            if all(col in df_filtered.columns for col in ['Urea_per_ha', 'NPK_per_ha', 'Organik_per_ha', 'Komoditas']):
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    fig = px.box(
-                        df_filtered,
-                        x='Komoditas',
-                        y='Urea_per_ha',
-                        title='Distribusi Urea per Hektar (kg/ha)',
-                        color='Komoditas',
-                        points='outliers'
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-                
-                with col2:
-                    fig = px.box(
-                        df_filtered,
-                        x='Komoditas',
-                        y='NPK_per_ha',
-                        title='Distribusi NPK per Hektar (kg/ha)',
-                        color='Komoditas',
-                        points='outliers'
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
+            with col1:
+                fig = px.box(
+                    df_filtered,
+                    x='Komoditas',
+                    y='Urea_per_ha',
+                    title='Distribusi Urea per Hektar (kg/ha)',
+                    color='Komoditas',
+                    points='outliers'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            
+            with col2:
+                fig = px.box(
+                    df_filtered,
+                    x='Komoditas',
+                    y='NPK_per_ha',
+                    title='Distribusi NPK per Hektar (kg/ha)',
+                    color='Komoditas',
+                    points='outliers'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+        if 'Organik_per_ha' in df_filtered.columns:
+            fig = px.box(
+                df_filtered,
+                x='Komoditas',
+                y='Organik_per_ha',
+                title='Distribusi Organik per Hektar (kg/ha)',
+                color='Komoditas',
+                points='outliers'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
 
 # ==========================================
 # PAGE 3: PREDIKSI DATA BARU
 # ==========================================
-elif page == "🔍 Prediksi Data Baru":
-    st.markdown('<div class="section-header">🔍 Prediksi Data Baru</div>', unsafe_allow_html=True)
+elif page == "Prediksi Data Baru":
+    st.markdown('<div class="section-header">Prediksi Data Baru</div>', unsafe_allow_html=True)
     
     st.markdown("""
     <div class="info-box">
-    <strong>ℹ️ Cara Menggunakan:</strong><br>
+    <strong>Cara Menggunakan:</strong><br>
     1. Masukkan data petani baru di form di bawah<br>
     2. Sistem akan otomatis menghitung status (jika standar aktif)<br>
     3. Rekomendasi akan diberikan berdasarkan analisis ML dan standar (jika aktif)
@@ -1452,7 +1259,7 @@ elif page == "🔍 Prediksi Data Baru":
     """, unsafe_allow_html=True)
     
     with st.form("prediction_form"):
-        st.subheader("📝 Data Petani Baru")
+        st.subheader("Data Petani Baru")
         
         col1, col2 = st.columns(2)
         
@@ -1462,13 +1269,15 @@ elif page == "🔍 Prediksi Data Baru":
             kelompok = st.text_input("Kelompok Tani", value="Kelompok Baru")
         
         with col2:
-            all_standards = standards_manager.get_all_standards()
-            commodity_options = list(all_standards.keys()) if all_standards else ['PADI', 'JAGUNG', 'KEDELAI', 'KOPI', 'CABAI']
+            # Gunakan komoditas dari config.yaml secara konsisten
+            all_commodities_config = get_all_commodities_from_config()
+            commodity_options = all_commodities_config if all_commodities_config else ['PADI', 'JAGUNG', 'KEDELAI', 'KOPI', 'CABAI'] # Fallback
+            
             komoditas = st.selectbox("Komoditas", commodity_options)
             luas_m2 = st.number_input("Luas Tanah (m²)", min_value=100, max_value=100000, value=5000, step=100)
         
         st.markdown("---")
-        st.subheader("🌾 Data Pupuk per Musim Tanam (kg)")
+        st.subheader("Data Pupuk per Musim Tanam (kg)")
         
         col1, col2, col3 = st.columns(3)
         
@@ -1490,7 +1299,7 @@ elif page == "🔍 Prediksi Data Baru":
             npk_mt3 = st.number_input("NPK MT3 (kg)", min_value=0.0, value=30.0, step=5.0, key="npk3")
             organik_mt3 = st.number_input("Organik MT3 (kg)", min_value=0.0, value=25.0, step=5.0, key="org3")
         
-        submitted = st.form_submit_button("🔍 Analisis Data", use_container_width=True, type="primary")
+        submitted = st.form_submit_button("Analisis Data", use_container_width=True, type="primary")
     
     if submitted:
         # Prepare input data
@@ -1567,7 +1376,7 @@ elif page == "🔍 Prediksi Data Baru":
                             st.markdown('<div class="success-box"><strong>🍂 Organik:</strong> Normal ✅<br>Sudah sesuai standar</div>', unsafe_allow_html=True)
                     
                     # Final status
-                    st.markdown("### 🎯 Status Keseluruhan")
+                    st.markdown("### Status Keseluruhan")
                     final_status = result.get('Final_Status', 'Unknown')
                     
                     if final_status == 'Overuse':
@@ -1580,7 +1389,7 @@ elif page == "🔍 Prediksi Data Baru":
                     st.info("ℹ️ Aktifkan standar pupuk untuk melihat status underuse/overuse")
                 
                 # Detailed info table
-                st.markdown("### 📊 Detail Penggunaan Pupuk")
+                st.markdown("### Detail Penggunaan Pupuk")
                 
                 detail_data = {
                     'Jenis Pupuk': ['Urea', 'NPK', 'Organik', 'TOTAL'],
@@ -1627,109 +1436,183 @@ elif page == "🔍 Prediksi Data Baru":
             st.code(traceback.format_exc())
 
 # ==========================================
-# PAGE 4: CLUSTERING & POLA
+# PAGE 4: CLUSTERING & POLA (WITH ENHANCED EXPLANATION)
 # ==========================================
-elif page == "🎯 Clustering & Pola":
-    st.markdown('<div class="section-header">🎯 Clustering & Analisis Pola</div>', unsafe_allow_html=True)
+elif page == "Clustering & Pola":
+    st.markdown('<div class="section-header">Clustering & Pola Penggunaan Pupuk</div>', unsafe_allow_html=True)
     
     if df is None:
         st.error("❌ Data tidak tersedia")
         st.stop()
     
     if 'Cluster_ID' not in df.columns:
-        st.warning("⚠️ Data clustering belum tersedia. Jalankan `python main.py` terlebih dahulu.")
+        st.warning("⚠️ Data clustering belum tersedia. Jalankan `python main.py` untuk melakukan clustering.")
         st.stop()
     
     st.markdown("""
     <div class="info-box">
-    <strong>ℹ️ Tentang Clustering:</strong><br>
-    Clustering mengelompokkan petani berdasarkan pola penggunaan pupuk yang mirip.
-    Ini membantu mengidentifikasi pola-pola tertentu dalam distribusi pupuk subsidi.
+    <strong>Apa itu Clustering? (Penjelasan Sederhana)</strong><br><br>
+    
+    Clustering adalah cara komputer mengelompokkan petani yang memiliki <strong>pola penggunaan pupuk serupa</strong>. 
+    Bayangkan seperti mengelompokkan siswa berdasarkan hobi mereka.<br><br>
+    
+    <strong>Poin Penting:</strong><br>
+    <ul style="margin: 10px 0; padding-left: 20px;">
+        <li><strong>Cluster BUKAN penilaian baik/buruk</strong> - Ini hanya pengelompokan berdasarkan kesamaan</li>
+        <li>Setiap cluster punya <strong>karakteristik unik</strong> - luas lahan, intensitas pupuk, jenis pupuk dominan</li>
+        <li><strong>Tidak ada cluster yang "salah"</strong> - Semuanya valid, hanya berbeda pendekatan</li>
+        <li>Berguna untuk <strong>strategi distribusi dan edukasi yang lebih tepat sasaran</strong></li>
+    </ul>
+    
+    <em>Contoh: Cluster A = petani lahan kecil dengan pupuk organik tinggi. Cluster B = petani lahan besar dengan urea dominan. 
+    Keduanya valid, hanya perlu pendekatan berbeda!</em>
     </div>
     """, unsafe_allow_html=True)
     
-    # Cluster summary
     n_clusters = df['Cluster_ID'].nunique()
-    st.subheader(f"📊 Ringkasan: {n_clusters} Cluster Teridentifikasi")
     
-    # Cluster distribution
+    if n_clusters < 2:
+        st.warning(f"""
+        ⚠️ <strong>Hanya {n_clusters} cluster ditemukan</strong>
+        
+        Jumlah cluster terlalu sedikit untuk analisis yang bermakna. 
+        Idealnya minimal 3-5 cluster untuk melihat pola yang beragam.
+        
+        <strong>Penyebab:</strong>
+        - Dataset terlalu kecil
+        - Pola penggunaan pupuk sangat homogen
+        
+        <strong>Saran:</strong> Tambahkan lebih banyak data atau sesuaikan parameter clustering.
+        """)
+    
+    st.markdown(f"### Ringkasan: {n_clusters} Kelompok Petani Teridentifikasi")
+    
+    # Display cluster sizes
+    col1, col2, col3, col4 = st.columns(4)
     cluster_counts = df['Cluster_ID'].value_counts().sort_index()
     
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        st.markdown("### 📈 Distribusi Cluster")
-        for cluster_id in sorted(cluster_counts.index):
-            count = cluster_counts[cluster_id]
+    for i, (cluster_id, count) in enumerate(cluster_counts.items()):
+        with [col1, col2, col3, col4][i % 4]:
             pct = count / len(df) * 100
-            st.metric(f"Cluster {cluster_id}", f"{count} petani", f"{pct:.1f}%")
+            st.metric(
+                f"Cluster {cluster_id}",
+                f"{count:,} petani",
+                f"{pct:.1f}%"
+            )
     
-    with col2:
-        fig = px.pie(
-            values=cluster_counts.values,
-            names=[f"Cluster {i}" for i in cluster_counts.index],
-            title='Distribusi Petani per Cluster',
-            hole=0.4
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # Cluster characteristics
     st.markdown("---")
-    st.markdown("### 🔍 Karakteristik Setiap Cluster")
     
+    st.markdown("Karakteristik Setiap Cluster (Penjelasan Detail)")
+    
+    # Get characteristics from models atau generate baru
+    if models and 'clustering' in models and 'characteristics' in models['clustering']:
+        characteristics = models['clustering']['characteristics']
+    else:
+        # Import only if needed
+        from src.clustering import generate_cluster_characteristics
+        characteristics = generate_cluster_characteristics(df)
+    
+    # Display each cluster dengan ringkasan statistik
     for cluster_id in sorted(df['Cluster_ID'].unique()):
-        cluster_data = df[df['Cluster_ID'] == cluster_id]
-        
-        with st.expander(f"📍 Cluster {cluster_id} ({len(cluster_data)} petani)", expanded=True):
+        with st.expander(f"Detail Cluster {cluster_id} ({cluster_counts[cluster_id]:,} petani)", expanded=(cluster_id == 0)):
+            cluster_data = df[df['Cluster_ID'] == cluster_id]
+            
+            if str(cluster_id) in characteristics:
+                st.markdown(characteristics[str(cluster_id)], unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Statistik ringkas
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
-                avg_luas = cluster_data['Luas_Tanah_ha'].mean()
+                avg_luas = cluster_data['Luas_Tanah_ha'].mean() if 'Luas_Tanah_ha' in cluster_data.columns else 0
                 st.metric("Rata-rata Luas", f"{avg_luas:.2f} ha")
             
             with col2:
-                if 'Total_Pupuk' in cluster_data.columns:
-                    avg_total = cluster_data['Total_Pupuk'].mean()
-                    st.metric("Rata-rata Total Pupuk", f"{avg_total:.1f} kg")
+                avg_urea = cluster_data['Urea_per_ha'].mean() if 'Urea_per_ha' in cluster_data.columns else 0
+                st.metric("Rata-rata Urea", f"{avg_urea:.1f} kg/ha")
             
             with col3:
-                if 'Total_per_ha' in cluster_data.columns:
-                    avg_intensity = cluster_data['Total_per_ha'].mean()
-                    st.metric("Intensitas", f"{avg_intensity:.1f} kg/ha")
+                avg_npk = cluster_data['NPK_per_ha'].mean() if 'NPK_per_ha' in cluster_data.columns else 0
+                st.metric("Rata-rata NPK", f"{avg_npk:.1f} kg/ha")
             
             with col4:
-                if standards_enabled and 'Final_Status' in cluster_data.columns:
-                    overuse_pct = (cluster_data['Final_Status'] == 'Overuse').mean() * 100
-                    underuse_pct = (cluster_data['Final_Status'] == 'Underuse').mean() * 100
-                    
-                    if overuse_pct > 30:
-                        st.metric("Status Dominan", "Overuse", f"{overuse_pct:.0f}%")
-                    elif underuse_pct > 30:
-                        st.metric("Status Dominan", "Underuse", f"{underuse_pct:.0f}%")
-                    else:
-                        st.metric("Status Dominan", "Normal", "Stabil")
+                avg_organik = cluster_data['Organik_per_ha'].mean() if 'Organik_per_ha' in cluster_data.columns else 0
+                st.metric("Rata-rata Organik", f"{avg_organik:.1f} kg/ha")
             
-            # Visualisasi cluster
             if all(col in cluster_data.columns for col in ['Urea_per_ha', 'NPK_per_ha', 'Organik_per_ha']):
-                avg_urea = cluster_data['Urea_per_ha'].mean()
-                avg_npk = cluster_data['NPK_per_ha'].mean()
-                avg_organik = cluster_data['Organik_per_ha'].mean()
+                avg_total = avg_urea + avg_npk + avg_organik
+                if avg_total > 0:
+                    proportions = {
+                        'Urea': (avg_urea / avg_total) * 100,
+                        'NPK': (avg_npk / avg_total) * 100,
+                        'Organik': (avg_organik / avg_total) * 100
+                    }
+                    
+                    fig = px.pie(
+                        values=list(proportions.values()),
+                        names=list(proportions.keys()),
+                        title=f'Komposisi Pupuk Cluster {cluster_id}',
+                        color=list(proportions.keys()),
+                        color_discrete_map={'Urea': '#66b5f6', 'NPK': '#81c784', 'Organik': '#ffb74d'}
+                    )
+                    fig.update_traces(textposition='inside', textinfo='percent+label')
+                    st.plotly_chart(fig, use_container_width=True)
+    
+    st.markdown("---")
+    
+    st.markdown("### Rekomendasi Strategi per Cluster")
+    
+    st.markdown("""
+    <div class="success-box">
+    <strong>Mengapa Penting?</strong><br>
+    Setiap cluster memiliki karakteristik berbeda, sehingga memerlukan:
+    <ul style="margin: 10px 0; padding-left: 20px;">
+        <li><strong>Strategi distribusi yang berbeda</strong> - Cluster lahan besar vs kecil perlu pendekatan berbeda</li>
+        <li><strong>Edukasi yang disesuaikan</strong> - Cluster intensitas tinggi perlu edukasi efisiensi, cluster rendah perlu edukasi manfaat</li>
+        <li><strong>Monitoring yang tepat sasaran</strong> - Fokuskan sumber daya pada cluster yang paling memerlukan perhatian</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Display recommendations per cluster (simplified)
+    for cluster_id in sorted(df['Cluster_ID'].unique()):
+        with st.expander(f"Rekomendasi untuk Cluster {cluster_id}", expanded=False):
+            cluster_data = df[df['Cluster_ID'] == cluster_id]
+            
+            # Basic insights based on characteristics
+            rec = []
+            if 'Total_per_ha' in cluster_data.columns and cluster_data['Total_per_ha'].mean() > 300: # Threshold example
+                rec.append("Fokus pada edukasi efisiensi penggunaan pupuk dan pengurangan dosis")
+            elif 'Total_per_ha' in cluster_data.columns and cluster_data['Total_per_ha'].mean() < 100: # Threshold example
+                rec.append("Tingkatkan edukasi tentang pentingnya pupuk bagi hasil panen yang optimal")
+            
+            if 'Luas_Tanah_ha' in cluster_data.columns and cluster_data['Luas_Tanah_ha'].mean() > 2: # Threshold example
+                rec.append("Pertimbangkan program bantuan yang lebih besar karena luas lahan rata-rata besar")
+            else:
+                rec.append("Pertimbangkan program bantuan yang lebih terjangkau untuk petani lahan kecil")
+            
+            if standards_enabled and 'Final_Status' in cluster_data.columns:
+                overuse_pct = (cluster_data['Final_Status'] == 'Overuse').mean() * 100
+                underuse_pct = (cluster_data['Final_Status'] == 'Underuse').mean() * 100
                 
-                fig = go.Figure(data=[
-                    go.Bar(name='Urea', x=['Urea'], y=[avg_urea], marker_color='#64b5f6'),
-                    go.Bar(name='NPK', x=['NPK'], y=[avg_npk], marker_color='#81c784'),
-                    go.Bar(name='Organik', x=['Organik'], y=[avg_organik], marker_color='#ffb74d')
-                ])
-                fig.update_layout(
-                    title=f"Rata-rata Penggunaan Pupuk (kg/ha) - Cluster {cluster_id}",
-                    showlegend=False,
-                    height=300
-                )
-                st.plotly_chart(fig, use_container_width=True)
+                if overuse_pct > 30:
+                    rec.append("Waspadai potensi overuse, lakukan sosialisasi dampak negatifnya")
+                elif underuse_pct > 30:
+                    rec.append("Dorong penggunaan pupuk sesuai standar untuk hasil maksimal")
+            
+            if not rec:
+                rec.append("Perlu analisis lebih lanjut untuk menentukan strategi spesifik.")
+            
+            st.markdown("<strong>Saran Strategi:</strong>", unsafe_allow_html=True)
+            for item in rec:
+                st.markdown(f"- {item}")
+    
+    st.markdown("---")
     
     # Scatter plot: Luas vs Intensitas colored by cluster
-    st.markdown("---")
-    st.markdown("### 📊 Visualisasi: Luas Lahan vs Intensitas Pupuk")
+    st.markdown("### Visualisasi: Luas Lahan vs Intensitas Pupuk")
     
     if all(col in df.columns for col in ['Luas_Tanah_ha', 'Total_per_ha', 'Cluster_ID']):
         fig = px.scatter(
@@ -1739,15 +1622,15 @@ elif page == "🎯 Clustering & Pola":
             color='Cluster_ID',
             title='Pola Luas Lahan vs Intensitas Pupuk per Cluster',
             labels={'Luas_Tanah_ha': 'Luas Lahan (ha)', 'Total_per_ha': 'Intensitas Pupuk (kg/ha)'},
-            hover_data=['Komoditas', 'Total_Pupuk']
+            hover_data=['Komoditas', 'Total_Pupuk'] if 'Komoditas' in df.columns else None
         )
         st.plotly_chart(fig, use_container_width=True)
 
 # ==========================================
 # PAGE 5: REKOMENDASI (ENHANCED)
 # ==========================================
-elif page == "💡 Rekomendasi":
-    st.markdown('<div class="section-header">💡 Rekomendasi & Action Plan</div>', unsafe_allow_html=True)
+elif page == "Rekomendasi":
+    st.markdown('<div class="section-header">Rekomendasi & Action Plan</div>', unsafe_allow_html=True)
     
     if df is None:
         st.error("❌ Data tidak tersedia")
@@ -1759,7 +1642,7 @@ elif page == "💡 Rekomendasi":
     
     st.markdown("""
     <div class="info-box">
-    <strong>ℹ️ Tentang Rekomendasi:</strong><br>
+    <strong>Tentang Rekomendasi:</strong><br>
     Rekomendasi dihasilkan berdasarkan:<br>
     1. Deteksi anomali (ML)<br>
     2. Pola clustering<br>
@@ -1769,7 +1652,7 @@ elif page == "💡 Rekomendasi":
     """, unsafe_allow_html=True)
     
     # Summary by priority
-    st.subheader("📊 Ringkasan Prioritas")
+    st.subheader("Ringkasan Prioritas")
     
     col1, col2, col3 = st.columns(3)
     
@@ -1780,7 +1663,7 @@ elif page == "💡 Rekomendasi":
     with col1:
         st.markdown(f"""
         <div class="danger-box">
-        <h3>🚨 Prioritas Tinggi</h3>
+        <h3>Prioritas Tinggi</h3>
         <h2>{tinggi:,} petani</h2>
         <p>{tinggi/len(df)*100:.1f}% dari total</p>
         </div>
@@ -1789,7 +1672,7 @@ elif page == "💡 Rekomendasi":
     with col2:
         st.markdown(f"""
         <div class="warning-box">
-        <h3>⚠️ Prioritas Sedang</h3>
+        <h3>Prioritas Sedang</h3>
         <h2>{sedang:,} petani</h2>
         <p>{sedang/len(df)*100:.1f}% dari total</p>
         </div>
@@ -1798,14 +1681,14 @@ elif page == "💡 Rekomendasi":
     with col3:
         st.markdown(f"""
         <div class="success-box">
-        <h3>✅ Prioritas Rendah</h3>
+        <h3>Prioritas Rendah</h3>
         <h2>{rendah:,} petani</h2>
         <p>{rendah/len(df)*100:.1f}% dari total</p>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
-    st.subheader("🔍 Detail Rekomendasi")
+    st.subheader("Detail Rekomendasi")
     
     col1, col2, col3 = st.columns(3)
     
@@ -1848,7 +1731,7 @@ elif page == "💡 Rekomendasi":
     if komoditas_filter_rec != 'Semua' and 'Komoditas' in df.columns:
         df_filtered = df_filtered[df_filtered['Komoditas'] == komoditas_filter_rec]
     
-    st.info(f"📊 Menampilkan {len(df_filtered):,} petani")
+    st.info(f"Menampilkan {len(df_filtered):,} petani")
     
     # Display recommendations
     display_cols = ['ID_Petani', 'Desa', 'Komoditas', 'Luas_Tanah_ha', 'Total_per_ha', 'Prioritas', 'Rekomendasi', 'Action_Plan']
@@ -1865,7 +1748,7 @@ elif page == "💡 Rekomendasi":
     # Download recommendations
     csv = df_filtered[display_cols].to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="⬇️ Download Rekomendasi (CSV)",
+        label="Download Rekomendasi (CSV)",
         data=csv,
         file_name=f"rdkk_rekomendasi_{priority_filter.lower()}.csv",
         mime="text/csv",
@@ -1874,7 +1757,7 @@ elif page == "💡 Rekomendasi":
     # Action plan summary
     if 'Action_Plan' in df_filtered.columns:
         st.markdown("---")
-        st.subheader("📋 Action Plan Prioritas Tinggi")
+        st.subheader("Action Plan Prioritas Tinggi")
         
         high_priority = df_filtered[df_filtered['Prioritas'] == 'Tinggi']
         
@@ -1901,12 +1784,12 @@ elif page == "💡 Rekomendasi":
 # ==========================================
 # PAGE 6: TENTANG MODEL (HIGHLY ENHANCED)
 # ==========================================
-elif page == "📚 Tentang Model":
-    st.markdown('<div class="section-header">📚 Tentang Model Machine Learning</div>', unsafe_allow_html=True)
+elif page == "Tentang Model":
+    st.markdown('<div class="section-header">Tentang Model Machine Learning</div>', unsafe_allow_html=True)
     
-    st.markdown("""
+    st.markdown(f"""
     <div class="info-box">
-    <strong>ℹ️ Penjelasan untuk User Awam:</strong><br>
+    <strong>Penjelasan untuk User Awam:</strong><br>
     Halaman ini menjelaskan bagaimana sistem menggunakan kecerdasan buatan (AI) untuk menganalisis data pupuk subsidi.
     Tidak perlu keahlian teknis - kami jelaskan dengan bahasa sederhana!
     </div>
@@ -1914,13 +1797,13 @@ elif page == "📚 Tentang Model":
     
     # Section 1: Ringkasan Model
     st.markdown("---")
-    st.markdown("### 🤖 1. Ringkasan Model AI")
+    st.markdown("1. Ringkasan Model AI")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("""
-        <strong>🔍 Isolation Forest (Deteksi Anomali)</strong>
+        st.markdown(f"""
+        <strong>Isolation Forest (Deteksi Anomali)</strong>
         
         Model ini bekerja seperti "pendeteksi pola aneh":
         - Menganalisis semua data penggunaan pupuk
@@ -1930,20 +1813,20 @@ elif page == "📚 Tentang Model":
         
         <strong>Kenapa penting?</strong>  
         Membantu menemukan kasus overuse atau underuse yang signifikan secara objektif berdasarkan data aktual.
-        """)
+        """, unsafe_allow_html=True)
         
         if df is not None and 'Anomaly_Label' in df.columns:
             anomaly_counts = df['Anomaly_Label'].value_counts()
             normal_count = anomaly_counts.get('Normal', 0)
             anomaly_count = len(df) - normal_count
             
-            st.metric("Total Data Dianalisis", f"{len(df):,} petani")
+            st.metric("Total Data Dianalisis", f"{len(df):,}")
             st.metric("Deteksi Normal", f"{normal_count:,}", f"{normal_count/len(df)*100:.1f}%")
             st.metric("Deteksi Anomali", f"{anomaly_count:,}", f"{anomaly_count/len(df)*100:.1f}%")
     
     with col2:
-        st.markdown("""
-        <strong>🎯 KMeans Clustering (Pengelompokan)</strong>
+        st.markdown(f"""
+        <strong>KMeans Clustering (Pengelompokan)</strong>
         
         Model ini seperti "pengelompokan otomatis":
         - Mengelompokkan petani dengan pola serupa
@@ -1953,7 +1836,7 @@ elif page == "📚 Tentang Model":
         
         <strong>Kenapa penting?</strong>  
         Membantu pemerintah memahami berbagai tipe petani dan kebutuhan mereka yang berbeda-beda.
-        """)
+        """, unsafe_allow_html=True)
         
         if df is not None and 'Cluster_ID' in df.columns:
             n_clusters = df['Cluster_ID'].nunique()
@@ -1965,7 +1848,7 @@ elif page == "📚 Tentang Model":
     
     # Section 2: Pipeline Diagram
     st.markdown("---")
-    st.markdown("### 🔄 2. Alur Kerja Sistem (Pipeline)")
+    st.markdown("2. Alur Kerja Sistem (Pipeline)")
     
     st.markdown("""
     Berikut adalah tahapan pemrosesan data dari awal hingga menghasilkan rekomendasi:
@@ -1974,34 +1857,43 @@ elif page == "📚 Tentang Model":
     pipeline_cols = st.columns(7)
     
     pipeline_steps = [
-        ("📥", "1. Load Data", "Membaca data CSV petani", "#e3f2fd"),
-        ("🧹", "2. Preprocessing", "Membersihkan & standarisasi data", "#f3e5f5"),
-        ("⚙️", "3. Feature Engineering", "Menghitung pupuk per ha, total, dll", "#e8f5e9"),
-        ("🔍", "4. Anomaly Detection", "Deteksi pola tidak normal (ML)", "#fff3e0"),
-        ("🎯", "5. Clustering", "Pengelompokan pola serupa", "#fce4ec"),
-        ("💡", "6. Generate Recommendations", "Buat rekomendasi & prioritas", "#e0f2f1"),
-        ("💾", "7. Export Results", "Simpan hasil analisis", "#f1f8e9")
+        ("1. Load Data", "Membaca data CSV petani", "#e3f2fd"),
+        ("2. Preprocessing", "Membersihkan & standarisasi data", "#f3e5f5"),
+        ("3. Feature Engineering", "Menghitung pupuk per ha, total, dll", "#e8f5e9"),
+        ("4. Anomaly Detection", "Deteksi pola tidak normal (ML)", "#fff3e0"),
+        ("5. Clustering", "Pengelompokan pola serupa", "#fce4ec"),
+        ("6. Generate Recommendations", "Buat rekomendasi & prioritas", "#e0f2f1"),
+        ("7. Export Results", "Simpan hasil analisis", "#f1f8e9")
     ]
     
-    for i, (icon, title, desc, color) in enumerate(pipeline_steps):
+    for i, (title, desc, color) in enumerate(pipeline_steps):
         with pipeline_cols[i]:
             st.markdown(f"""
-            <div style="background: {color}; padding: 1rem; border-radius: 0.5rem; text-align: center; height: 200px; display: flex; flex-direction: column; justify-content: center;">
-            <div style="font-size: 2rem;">{icon}</div>
+            <div style="
+            background: {color};
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            ">
             <strong>{title}</strong>
             <p style="font-size: 0.8rem; margin-top: 0.5rem;">{desc}</p>
-            </div>
-            """, unsafe_allow_html=True)
+        </div>
+        """, unsafe_allow_html=True)
+
     
     # Section 3: Cara Model Mengambil Keputusan
     st.markdown("---")
-    st.markdown("### 🧠 3. Cara Model Mengambil Keputusan")
+    st.markdown("3. Cara Model Mengambil Keputusan")
     
     if df is not None:
-        tab1, tab2, tab3 = st.tabs(["🔍 Anomaly Detection", "🎯 Clustering", "💡 Rekomendasi"])
+        tab1, tab2, tab3 = st.tabs(["Anomaly Detection", "Clustering", "Rekomendasi"])
         
         with tab1:
-            st.markdown("""
+            st.markdown(f"""
             <strong>Bagaimana Isolation Forest Mendeteksi Anomali?</strong>
             
             Model ini menggunakan konsep "isolasi":
@@ -2009,7 +1901,7 @@ elif page == "📚 Tentang Model":
             2. Data anomali biasanya terisolasi dan mudah dipisahkan
             3. Model menghitung "skor anomali" untuk setiap petani
             4. Skor tinggi = kemungkinan besar anomali (pola tidak biasa)
-            """)
+            """,unsafe_allow_html=True)
             
             if 'Anomaly_Score' in df.columns:
                 st.markdown("##### Distribusi Skor Anomali")
@@ -2050,20 +1942,32 @@ elif page == "📚 Tentang Model":
                     st.plotly_chart(fig, use_container_width=True)
                 
                 with col2:
-                    st.markdown("<strong>Penjelasan Kategori:</strong>")
+                    st.markdown(f"<strong>Penjelasan Kategori:</strong>", unsafe_allow_html=True)
                     for label in anomaly_dist.index:
                         count = anomaly_dist[label]
                         pct = count / len(df) * 100
                         
-                        if label == 'Normal':
-                            st.markdown(f"✅ <strong>{label}</strong>: {count:,} petani ({pct:.1f}%)")
-                            st.markdown("Penggunaan pupuk dalam batas wajar")
-                        elif label == 'Ringan':
-                            st.markdown(f"⚠️ <strong>{label}</strong>: {count:,} petani ({pct:.1f}%)")
-                            st.markdown("Sedikit menyimpang, perlu perhatian")
-                        else:
-                            st.markdown(f"🚨 <strong>{label}</strong>: {count:,} petani ({pct:.1f}%)")
-                            st.markdown("Sangat menyimpang, prioritas tinggi")
+                    if label == 'Normal':
+                        st.markdown(
+                            f"<strong>{label}</strong>: {count:,} petani ({pct:.1f}%)",
+                            unsafe_allow_html=True
+                        )
+                        st.markdown("Penggunaan pupuk dalam batas wajar")
+
+                    elif label == 'Ringan':
+                        st.markdown(
+                            f"<strong>{label}</strong>: {count:,} petani ({pct:.1f}%)",
+                            unsafe_allow_html=True
+                        )
+                        st.markdown("Sedikit menyimpang, perlu perhatian")
+
+                    else:
+                        st.markdown(
+                            f"<strong>{label}</strong>: {count:,} petani ({pct:.1f}%)",
+                            unsafe_allow_html=True
+                        )
+                        st.markdown("Sangat menyimpang, prioritas tinggi")
+
         
         with tab2:
             st.markdown("""
@@ -2150,7 +2054,7 @@ elif page == "📚 Tentang Model":
                 for cluster_id in sorted(df['Cluster_ID'].unique()):
                     cluster_data = df[df['Cluster_ID'] == cluster_id]
                     
-                    with st.expander(f"Cluster {cluster_id} ({len(cluster_data)} petani)", expanded=False):
+                    with st.expander(f"Cluster {cluster_id} ({cluster_data['Cluster_ID'].count():,} petani)", expanded=False):
                         col1, col2, col3 = st.columns(3)
                         
                         with col1:
@@ -2248,7 +2152,7 @@ elif page == "📚 Tentang Model":
         
     # Section 4: Fitur Penting
     st.markdown("---")
-    st.markdown("### 📊 4. Fitur-Fitur Penting yang Dianalisis")
+    st.markdown("### 4. Fitur-Fitur Penting yang Dianalisis")
     
     st.markdown("""
     Model menganalisis berbagai variabel untuk menghasilkan insight. Berikut adalah fitur-fitur utama:
@@ -2315,13 +2219,13 @@ elif page == "📚 Tentang Model":
     
     # Section 5: Statistik Model (ENHANCED)
     st.markdown("---")
-    st.markdown("### 📈 5. Statistik & Performa Model")
+    st.markdown("5. Statistik & Performa Model")
     
     if df is not None:
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.markdown("##### 📊 Data")
+            st.markdown("##### Data")
             st.metric("Total Sampel", f"{len(df):,}")
             
             if 'Komoditas' in df.columns:
@@ -2331,7 +2235,7 @@ elif page == "📚 Tentang Model":
                 st.metric("Jumlah Desa", df['Desa'].nunique())
         
         with col2:
-            st.markdown("##### 🎯 Clustering")
+            st.markdown("##### Clustering")
             
             if 'Cluster_ID' in df.columns:
                 st.metric("Jumlah Cluster", df['Cluster_ID'].nunique())
@@ -2354,7 +2258,7 @@ elif page == "📚 Tentang Model":
                         pass
         
         with col3:
-            st.markdown("##### 🔍 Anomaly")
+            st.markdown("##### Anomaly")
             
             if 'Anomaly_Label' in df.columns:
                 anomaly_rate = (df['Anomaly_Label'] != 'Normal').mean() * 100
@@ -2371,7 +2275,7 @@ elif page == "📚 Tentang Model":
                              help="Kasus yang perlu perhatian serius")
         
         with col4:
-            st.markdown("##### 📏 Deviasi Pupuk")
+            st.markdown("##### Deviasi Pupuk")
             
             if 'Total_per_ha' in df.columns:
                 median_intensity = df['Total_per_ha'].median()
@@ -2385,7 +2289,7 @@ elif page == "📚 Tentang Model":
     
     # Section 6: Kesimpulan Otomatis (ENHANCED)
     st.markdown("---")
-    st.markdown("### 💡 6. Kesimpulan & Insight Otomatis")
+    st.markdown("### 6. Kesimpulan & Insight Otomatis")
     
     if df is not None:
         st.markdown("<strong>Berdasarkan analisis data, sistem menghasilkan insight berikut:</strong>", unsafe_allow_html=True)
@@ -2398,21 +2302,21 @@ elif page == "📚 Tentang Model":
             anomaly_pct = anomaly_count / len(df) * 100
             
             if anomaly_pct > 20:
-                insights.append(f"🚨 <strong>Tingkat anomali cukup tinggi ({anomaly_pct:.1f}%)</strong> - Perlu investigasi mendalam pada {anomaly_count:,} petani yang terdeteksi memiliki pola penggunaan tidak normal.")
+                insights.append(f"<strong>Tingkat anomali cukup tinggi ({anomaly_pct:.1f}%)</strong> - Perlu investigasi mendalam pada {anomaly_count:,} petani yang terdeteksi memiliki pola penggunaan tidak normal.")
             elif anomaly_pct > 10:
-                insights.append(f"⚠️ <strong>Tingkat anomali moderat ({anomaly_pct:.1f}%)</strong> - Ada {anomaly_count:,} petani yang perlu perhatian khusus.")
+                insights.append(f"<strong>Tingkat anomali moderat ({anomaly_pct:.1f}%)</strong> - Ada {anomaly_count:,} petani yang perlu perhatian khusus.")
             else:
-                insights.append(f"✅ <strong>Tingkat anomali rendah ({anomaly_pct:.1f}%)</strong> - Sebagian besar petani ({len(df)-anomaly_count:,}) memiliki pola penggunaan normal.")
+                insights.append(f"<strong>Tingkat anomali rendah ({anomaly_pct:.1f}%)</strong> - Sebagian besar petani ({len(df)-anomaly_count:,}) memiliki pola penggunaan normal.")
         
         # Insight 2: Clustering distribution
         if 'Cluster_ID' in df.columns:
             n_clusters = df['Cluster_ID'].nunique()
-            insights.append(f"🎯 <strong>Teridentifikasi {n_clusters} kelompok petani berbeda</strong> - Menunjukkan keberagaman pola penggunaan pupuk yang perlu pendekatan berbeda.")
+            insights.append(f"<strong>Teridentifikasi {n_clusters} kelompok petani berbeda</strong> - Menunjukkan keberagaman pola penggunaan pupuk yang perlu pendekatan berbeda.")
             
             # Most common cluster
             most_common_cluster = df['Cluster_ID'].mode()[0]
             most_common_count = (df['Cluster_ID'] == most_common_cluster).sum()
-            insights.append(f"📊 <strong>Cluster {most_common_cluster} adalah yang terbesar</strong> dengan {most_common_count:,} petani ({most_common_count/len(df)*100:.1f}%), menunjukkan pola dominan.")
+            insights.append(f"<strong>Cluster {most_common_cluster} adalah yang terbesar</strong> dengan {most_common_count:,} petani ({most_common_count/len(df)*100:.1f}%), menunjukkan pola dominan.")
         
         # Insight 3: Priority distribution
         if 'Prioritas' in df.columns:
@@ -2420,11 +2324,11 @@ elif page == "📚 Tentang Model":
             high_pct = high_priority / len(df) * 100
             
             if high_pct > 15:
-                insights.append(f"🚨 <strong>{high_priority:,} petani ({high_pct:.1f}%) memerlukan tindakan segera</strong> - Prioritas tinggi untuk intervensi.")
+                insights.append(f"<strong>{high_priority:,} petani ({high_pct:.1f}%) memerlukan tindakan segera</strong> - Prioritas tinggi untuk intervensi.")
             elif high_pct > 5:
-                insights.append(f"⚠️ <strong>{high_priority:,} petani ({high_pct:.1f}%) perlu perhatian</strong> - Monitoring lebih intensif diperlukan.")
+                insights.append(f"<strong>{high_priority:,} petani ({high_pct:.1f}%) perlu perhatian</strong> - Monitoring lebih intensif diperlukan.")
             else:
-                insights.append(f"✅ <strong>Mayoritas petani dalam kondisi baik</strong> - Hanya {high_priority:,} ({high_pct:.1f}%) yang perlu tindakan segera.")
+                insights.append(f"<strong>Mayoritas petani dalam kondisi baik</strong> - Hanya {high_priority:,} ({high_pct:.1f}%) yang perlu tindakan segera.")
         
         # Insight 4: Commodity-specific
         if 'Komoditas' in df.columns and 'Total_per_ha' in df.columns:
@@ -2434,7 +2338,7 @@ elif page == "📚 Tentang Model":
             lowest_komoditas = komoditas_intensity.index[-1]
             lowest_value = komoditas_intensity.iloc[-1]
             
-            insights.append(f"🌾 <strong>{highest_komoditas} memiliki intensitas pupuk tertinggi</strong> ({highest_value:.1f} kg/ha), sedangkan <strong>{lowest_komoditas} terendah</strong> ({lowest_value:.1f} kg/ha).")
+            insights.append(f"<strong>{highest_komoditas} memiliki intensitas pupuk tertinggi</strong> ({highest_value:.1f} kg/ha), sedangkan <strong>{lowest_komoditas} terendah</strong> ({lowest_value:.1f} kg/ha).")
         
         # Insight 5: Standards compliance (if enabled)
         if standards_enabled and 'Final_Status' in df.columns:
@@ -2446,17 +2350,17 @@ elif page == "📚 Tentang Model":
             normal_pct = normal_count / len(df) * 100
             
             if overuse_pct > underuse_pct:
-                insights.append(f"📈 <strong>Overuse lebih dominan ({overuse_pct:.1f}%) dibanding underuse ({underuse_pct:.1f}%)</strong> - Fokus pada edukasi pengurangan dosis dan efisiensi penggunaan.")
+                insights.append(f"<strong>Overuse lebih dominan ({overuse_pct:.1f}%) dibanding underuse ({underuse_pct:.1f}%)</strong> - Fokus pada edukasi pengurangan dosis dan efisiensi penggunaan.")
             elif underuse_pct > overuse_pct:
-                insights.append(f"📉 <strong>Underuse lebih dominan ({underuse_pct:.1f}%) dibanding overuse ({overuse_pct:.1f}%)</strong> - Fokus pada peningkatan akses dan edukasi manfaat pupuk optimal.")
+                insights.append(f"<strong>Underuse lebih dominan ({underuse_pct:.1f}%) dibanding overuse ({overuse_pct:.1f}%)</strong> - Fokus pada peningkatan akses dan edukasi manfaat pupuk optimal.")
             else:
-                insights.append(f"⚖️ <strong>Distribusi relatif seimbang</strong>: Normal {normal_pct:.1f}%, Overuse {overuse_pct:.1f}%, Underuse {underuse_pct:.1f}%")
+                insights.append(f"<strong>Distribusi relatif seimbang</strong>: Normal {normal_pct:.1f}%, Overuse {overuse_pct:.1f}%, Underuse {underuse_pct:.1f}%")
         
         # Insight 6: Data quality
         if 'Total_Pupuk' in df.columns:
             zero_pupuk = (df['Total_Pupuk'] == 0).sum()
             if zero_pupuk > 0:
-                insights.append(f"⚠️ <strong>{zero_pupuk:,} petani memiliki total pupuk = 0</strong> - Perlu verifikasi data atau memang tidak menerima pupuk.")
+                insights.append(f"<strong>{zero_pupuk:,} petani memiliki total pupuk = 0</strong> - Perlu verifikasi data atau memang tidak menerima pupuk.")
         
         # Display insights
         for i, insight in enumerate(insights, 1):
@@ -2464,7 +2368,7 @@ elif page == "📚 Tentang Model":
         
         st.markdown("---")
         
-        st.markdown("### 📋 Rekomendasi Umum Berdasarkan Analisis")
+        st.markdown("### Rekomendasi Umum Berdasarkan Analisis")
         
         recommendations_general = []
         
@@ -2481,7 +2385,7 @@ elif page == "📚 Tentang Model":
                 recommendations_general.append("4. <strong>Sosialisasi dampak negatif overuse</strong> terhadap lingkungan dan biaya")
         
         if 'Cluster_ID' in df.columns:
-            recommendations_general.append(f"5. <strong>Strategi distribusi berbeda per cluster</strong> - {df['Cluster_ID'].nunique()} segmen petani memerlukan pendekatan berbeda")
+            recommendations_general.append("5. <strong>Strategi distribusi berbeda per cluster</strong> - {n_clusters} segmen petani memerlukan pendekatan berbeda".format(n_clusters=df['Cluster_ID'].nunique()))
         
         recommendations_general.append("6. <strong>Update data berkala</strong> untuk meningkatkan akurasi prediksi model")
         
@@ -2497,26 +2401,25 @@ elif page == "📚 Tentang Model":
         """, unsafe_allow_html=True)
 
 # ==========================================
-# PAGE 7: KELOLA STANDAR
+# PAGE 7: KELOLA STANDAR (WITH CONSISTENT COMMODITIES)
 # ==========================================
-elif page == "⚙️ Kelola Standar":
-    st.markdown('<div class="section-header">⚙️ Kelola Standar Pupuk</div>', unsafe_allow_html=True)
+elif page == "Kelola Standar":
+    st.markdown('<div class="section-header">Kelola Standar Pupuk</div>', unsafe_allow_html=True)
     
     st.markdown("""
     <div class="info-box">
-    <strong>ℹ️ Pengelolaan Standar:</strong><br>
-    Anda dapat menambah, edit, atau hapus standar pupuk per komoditas.
-    Standar ini digunakan untuk menentukan status Underuse/Overuse.
+    <strong>Tentang Standar:</strong><br>
+    Standar pupuk digunakan untuk menentukan apakah petani mengalami <strong>Overuse</strong>, <strong>Underuse</strong>, atau <strong>Normal</strong>.
+    <br><br>
+    • Standar dapat diubah sewaktu-waktu sesuai kebijakan<br>
+    • Perubahan standar akan <strong>langsung berlaku</strong> di semua halaman (Dashboard, Data Explorer, dll)<br>
+    • Format: Min-Max (kg/ha) untuk setiap jenis pupuk<br>
+    • Komoditas valid: <strong>{}</strong>
     </div>
-    """, unsafe_allow_html=True)
-    
-    # Toggle status
-    st.markdown(f"<strong>Status Saat Ini:</strong> {'🟢 Aktif' if standards_enabled else '🔴 Non-aktif'}", unsafe_allow_html=True)
-    
-    # Tampilkan standar yang ada
-    st.subheader("📋 Standar Pupuk Saat Ini")
+    """.format(', '.join(sorted(get_all_commodities_from_config()))), unsafe_allow_html=True)
     
     all_standards = standards_manager.get_all_standards()
+    st.markdown(f"### Standar Terdaftar: **{len(all_standards)}** komoditas")
     
     if all_standards:
         # Convert to dataframe for display
@@ -2534,12 +2437,25 @@ elif page == "⚙️ Kelola Standar":
         
         standards_df = pd.DataFrame(standards_list)
         st.dataframe(standards_df, use_container_width=True, hide_index=True)
+        
+        if df is not None and 'Komoditas' in df.columns:
+            data_commodities = set(df['Komoditas'].dropna().unique())
+            standard_commodities = set(all_standards.keys())
+            missing_standards = data_commodities - standard_commodities
+            
+            if missing_standards:
+                st.warning(f"""
+                **Perhatian:** Ada {len(missing_standards)} komoditas di data yang belum memiliki standar:
+                {', '.join(sorted(missing_standards))}
+                
+                Petani dengan komoditas ini tidak akan mendapat status Underuse/Overuse.
+                """)
     else:
         st.warning("⚠️ Belum ada standar pupuk yang terdaftar")
     
     # Form untuk tambah/edit standar
     st.markdown("---")
-    st.subheader("➕ Tambah/Edit Standar")
+    st.subheader("Tambah/Edit Standar")
     
     with st.form("standard_form"):
         col1, col2 = st.columns(2)
@@ -2596,7 +2512,7 @@ elif page == "⚙️ Kelola Standar":
     # Hapus standar
     if all_standards:
         st.markdown("---")
-        st.subheader("🗑️ Hapus Standar")
+        st.subheader("Hapus Standar")
         
         col1, col2 = st.columns([2, 1])
         
@@ -2608,7 +2524,7 @@ elif page == "⚙️ Kelola Standar":
         
         with col2:
             st.write("")  # Spacing
-            if st.button("🗑️ Hapus", type="secondary", use_container_width=True):
+            if st.button("Hapus", type="secondary", use_container_width=True):
                 if standards_manager.delete_standard(komoditas_to_delete):
                     if standards_manager.save_standards():
                         st.success(f"✅ Standar {komoditas_to_delete} berhasil dihapus!")
@@ -2622,7 +2538,7 @@ elif page == "⚙️ Kelola Standar":
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 2rem 0;">
-    <p><strong>RDKK System v4.0</strong> | Powered by Machine Learning & Data Science</p>
+    <p><strong>RDKK System v4.1</strong> | Powered by Machine Learning & Data Science</p>
     <p>© 2025 - Sistem Analisis Pupuk Subsidi</p>
     <p style="font-size: 0.9rem; margin-top: 1rem;">
         🌾 Membantu petani mengoptimalkan penggunaan pupuk untuk hasil panen yang lebih baik

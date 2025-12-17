@@ -15,6 +15,26 @@ models:
   output_dir: models/
   scaler_file: scaler.joblib
 standar_pupuk:
+  BAWANG MERAH:
+    NPK:
+      max: 350.0
+      min: 0.0
+    Organik:
+      max: 1000.0
+      min: 0.0
+    Urea:
+      max: 250.0
+      min: 0.0
+  # BAWANG_MERAH:
+  #   NPK:
+  #     max: 350.0
+  #     min: 0.0
+  #   Organik:
+  #     max: 1000.0
+  #     min: 0.0
+  #   Urea:
+  #     max: 250.0
+  #     min: 0.0
   CABAI:
     NPK:
       max: 400.0
@@ -35,16 +55,16 @@ standar_pupuk:
     Urea:
       max: 250.0
       min: 0.0
-  KEDELAI:
+  KAKAO:
     NPK:
-      max: 120
-      min: 80
+      max: 280.0
+      min: 0.0
     Organik:
-      max: 400
-      min: 200
+      max: 1000.0
+      min: 0.0
     Urea:
-      max: 180
-      min: 100
+      max: 300.0
+      min: 0.0
   KOPI:
     NPK:
       max: 860.0

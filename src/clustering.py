@@ -111,8 +111,8 @@ def train_kmeans_clustering(df: pd.DataFrame, n_clusters: Optional[int] = None, 
 
 def generate_cluster_characteristics(df: pd.DataFrame) -> dict:
     """
-    Generate penjelasan karakteristik setiap cluster secara otomatis
-    UPDATED: Penjelasan TIDAK menyebut MT dalam deskripsi
+    Generate penjelasan karakteristik setiap cluster secara otomatis DENGAN NARASI USER AWAM
+    UPDATED: Penjelasan TIDAK menyebut MT dalam deskripsi + penjelasan untuk user awam
     
     Returns:
         dict dengan cluster_id sebagai key dan deskripsi sebagai value
@@ -123,41 +123,54 @@ def generate_cluster_characteristics(df: pd.DataFrame) -> dict:
         cluster_data = df[df['Cluster_ID'] == cluster_id]
         
         # Hitung statistik
-        avg_luas = cluster_data['Luas_Tanah_ha'].mean()
+        avg_luas = cluster_data['Luas_Tanah_ha'].mean() if 'Luas_Tanah_ha' in cluster_data.columns else 0
         avg_urea = cluster_data['Urea_per_ha'].mean() if 'Urea_per_ha' in cluster_data.columns else 0
         avg_npk = cluster_data['NPK_per_ha'].mean() if 'NPK_per_ha' in cluster_data.columns else 0
         avg_organik = cluster_data['Organik_per_ha'].mean() if 'Organik_per_ha' in cluster_data.columns else 0
         
         if 'Anomaly_Label' in cluster_data.columns:
-            anomali_pct = (cluster_data['Anomaly_Label'] == 'Anomali').mean() * 100
+            anomali_pct = (cluster_data['Anomaly_Label'] != 'Normal').mean() * 100
         else:
             anomali_pct = 0
         
         # Generate deskripsi (TIDAK menyebut MT)
-        description = f"Cluster {cluster_id}: "
+        description = f"<strong>Cluster {cluster_id}:</strong> "
         
-        # Karakteristik luas lahan
+        # Karakteristik luas lahan (NARASI AWAM)
         if avg_luas < 0.5:
-            description += "Petani lahan kecil (<0.5 ha), "
+            description += "Petani dengan lahan kecil (kurang dari 0.5 hektar). Biasanya petani keluarga dengan skala kecil. "
         elif avg_luas < 1.5:
-            description += "Petani lahan sedang (0.5-1.5 ha), "
+            description += "Petani dengan lahan sedang (0.5-1.5 hektar). Skala menengah, bisa untuk kebutuhan keluarga dan sedikit dijual. "
         else:
-            description += "Petani lahan besar (>1.5 ha), "
+            description += "Petani dengan lahan besar (lebih dari 1.5 hektar). Skala komersial dengan produksi tinggi. "
         
-        # Karakteristik penggunaan pupuk per ha
+        # Karakteristik penggunaan pupuk per ha (NARASI AWAM)
         total_avg = avg_urea + avg_npk + avg_organik
         if total_avg < 300:
-            description += "intensitas pupuk rendah"
+            description += f"<em>Intensitas pupuk rendah</em> (rata-rata {total_avg:.0f} kg/ha total). Mungkin lahan organik atau kondisi tanah subur alami. "
         elif total_avg < 700:
-            description += "intensitas pupuk sedang"
+            description += f"<em>Intensitas pupuk sedang</em> (rata-rata {total_avg:.0f} kg/ha total). Penggunaan pupuk sesuai kebutuhan standar. "
         else:
-            description += "intensitas pupuk tinggi"
+            description += f"<em>Intensitas pupuk tinggi</em> (rata-rata {total_avg:.0f} kg/ha total). Pemupukan intensif untuk hasil maksimal. "
         
-        # Pola anomali
+        # Proporsi pupuk (NARASI AWAM)
+        if total_avg > 0:
+            pct_urea = (avg_urea / total_avg) * 100
+            pct_npk = (avg_npk / total_avg) * 100
+            pct_organik = (avg_organik / total_avg) * 100
+            
+            dominant = max([(pct_urea, 'Urea'), (pct_npk, 'NPK'), (pct_organik, 'Organik')], key=lambda x: x[0])
+            description += f"<strong>Dominan {dominant[1]}</strong> ({dominant[0]:.0f}%). "
+        
+        # Pola anomali (NARASI AWAM)
         if anomali_pct > 30:
-            description += f", banyak anomali ({anomali_pct:.0f}%)"
+            description += f"<span style='color:red;'>⚠️ Banyak pola tidak biasa ({anomali_pct:.0f}% anomali)</span> - Perlu perhatian khusus."
         elif anomali_pct < 10:
-            description += ", pola penggunaan stabil"
+            description += f"<span style='color:green;'>✅ Pola stabil dan konsisten</span> - Mayoritas petani mengikuti kebiasaan umum."
+        else:
+            description += f"Sebagian kecil ({anomali_pct:.0f}%) memiliki pola berbeda."
+        
+        description += "<br><br><em style='font-size:0.9em; color:#666;'>💡 Catatan: Cluster ini BUKAN penilaian baik/buruk. Ini hanya pengelompokan berdasarkan kesamaan pola. Setiap cluster memerlukan pendekatan berbeda.</em>"
         
         characteristics[str(cluster_id)] = description
     

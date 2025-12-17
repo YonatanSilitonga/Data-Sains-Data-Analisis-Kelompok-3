@@ -192,37 +192,36 @@ def compare_with_standard(value, standard, tolerance=0.2):
     """
     Bandingkan nilai dengan standar
     
+    UPDATED: Hanya cek overuse (melebihi max), bukan underuse
+    
     Parameters:
     - value: nilai aktual
-    - standard: nilai standar (dict atau float)
+    - standard: nilai standar (dict dengan 'max' key atau float)
     - tolerance: toleransi (0.2 = 20%)
     
     Returns:
-    - 'Normal': dalam rentang toleransi
-    - 'Terlalu Rendah': < (standard - tolerance*standard)
-    - 'Terlalu Tinggi': > (standard + tolerance*standard)
+    - 'Normal': tidak melebihi max
+    - 'Overuse': melebihi max
+    - 'Tidak Ada Standar': jika standar tidak valid
     """
     if isinstance(standard, dict):
-        if 'min' in standard and 'max' in standard:
-            if isinstance(standard['min'], (int, float)) and isinstance(standard['max'], (int, float)):
-                standard_value = (standard['min'] + standard['max']) / 2
+        if 'max' in standard:
+            if isinstance(standard['max'], (int, float)):
+                standard_max = standard['max']
             else:
                 return 'Tidak Ada Standar'
         else:
             return 'Tidak Ada Standar'
     else:
-        standard_value = standard
+        standard_max = standard
     
-    if pd.isna(value) or pd.isna(standard_value) or standard_value == 0:
+    if pd.isna(value) or pd.isna(standard_max) or standard_max == 0:
         return 'Tidak Ada Standar'
     
-    lower = standard_value * (1 - tolerance)
-    upper = standard_value * (1 + tolerance)
+    upper = standard_max * (1 + tolerance)
     
-    if value < lower:
-        return 'Terlalu Rendah'
-    elif value > upper:
-        return 'Terlalu Tinggi'
+    if value > upper:
+        return 'Overuse'
     else:
         return 'Normal'
 

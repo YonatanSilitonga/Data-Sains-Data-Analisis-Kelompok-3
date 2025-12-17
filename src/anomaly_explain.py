@@ -58,15 +58,19 @@ def generate_human_explanation(
     petani_name: str,
     komoditas: str,
     contributions: Dict,
-    anomaly_label: str
+    anomaly_label: str,
+    standards_manager = None
 ) -> str:
     """
     Generate penjelasan human-readable TANPA menyebut MT
+    
+    UPDATED: Standar adalah BATAS ATAS hak, bukan target ideal
     
     Fokus pada:
     - Apa yang normal (median komoditas)
     - Petani ini bagaimana
     - Di bagian mana berbeda (JENIS PUPUK, bukan MT)
+    - CONCRETE NUMBERS dari standar jika tersedia
     """
     explanation = []
     
@@ -78,28 +82,50 @@ def generate_human_explanation(
     
     explanation.append("**Detail Penggunaan Pupuk per Hektar:**\n")
     
+    standard = None
+    if standards_manager:
+        standard = standards_manager.get_standard(komoditas)
+    
     for pupuk, data in contributions.items():
         value = data['value']
         median = data['median']
         deviation_pct = data['deviation_pct']
         direction = data['direction']
         
+        standard_info = ""
+        if standard and pupuk in standard:
+            std_max = standard[pupuk]['max']  # Only use max, not min
+            
+            if value > std_max:
+                overuse_amount = value - std_max
+                overuse_pct = (overuse_amount / std_max) * 100
+                standard_info = f" | **Batas Maksimal {komoditas}**: {std_max:.0f} kg/ha → ⚠️ OVERUSE (+{overuse_amount:.1f} kg atau +{overuse_pct:.1f}% melebihi batas)"
+            else:
+                remaining = std_max - value
+                usage_pct = (value / std_max) * 100
+                standard_info = f" | **Batas Maksimal {komoditas}**: {std_max:.0f} kg/ha → ✅ Dalam batas ({usage_pct:.0f}% dari maksimal, sisa hak: {remaining:.1f} kg)"
+        
         # Format penjelasan
         if abs(deviation_pct) > 20:  # Signifikan berbeda
             explanation.append(
                 f"- **{pupuk}**: {value:.1f} kg/ha "
                 f"({direction} {abs(deviation_pct):.0f}% dari median {komoditas}: {median:.1f} kg/ha) "
-                f"⚠️\n"
+                f"{standard_info}\n"
             )
         else:
             explanation.append(
                 f"- **{pupuk}**: {value:.1f} kg/ha "
                 f"(mendekati median {komoditas}: {median:.1f} kg/ha) "
-                f"✓\n"
+                f"{standard_info}\n"
             )
     
     # Kesimpulan
     explanation.append("\n**Interpretasi:**\n")
+    
+    explanation.append(
+        "📌 **Catatan Penting**: Standar pupuk adalah **batas atas hak/alokasi maksimal** yang boleh ditebus petani, "
+        "BUKAN target ideal. Petani boleh menggunakan lebih rendah dari standar tanpa masalah.\n\n"
+    )
     
     # Cari pupuk dengan deviasi terbesar
     max_deviation_pupuk = max(contributions.keys(), 
@@ -110,12 +136,32 @@ def generate_human_explanation(
         if max_deviation > 0:
             explanation.append(
                 f"Petani ini menggunakan **{max_deviation_pupuk}** jauh lebih tinggi dari mayoritas petani {komoditas}. "
-                f"Perlu dievaluasi apakah penggunaan ini sesuai dengan kondisi lahan atau ada kemungkinan overuse.\n"
             )
+            if standard and max_deviation_pupuk in standard:
+                std_max = standard[max_deviation_pupuk]['max']
+                actual = contributions[max_deviation_pupuk]['value']
+                if actual > std_max:
+                    explanation.append(
+                        f"**⚠️ OVERUSE TERDETEKSI**: Batas maksimal {komoditas} untuk {max_deviation_pupuk}: **{std_max} kg/ha**, "
+                        f"petani menggunakan: **{actual:.1f} kg/ha** (melebihi **+{actual - std_max:.1f} kg/ha**). "
+                        f"Ini berarti melebihi alokasi hak subsidi.\n"
+                    )
+                else:
+                    explanation.append(
+                        f"Meskipun lebih tinggi dari median, masih dalam batas maksimal ({std_max} kg/ha). "
+                        f"Perlu evaluasi apakah penggunaan ini efisien.\n"
+                    )
+            else:
+                explanation.append(
+                    f"Perlu dievaluasi apakah penggunaan ini sesuai dengan kondisi lahan.\n"
+                )
         else:
             explanation.append(
                 f"Petani ini menggunakan **{max_deviation_pupuk}** jauh lebih rendah dari mayoritas petani {komoditas}. "
-                f"Perlu dievaluasi apakah ada kendala akses pupuk atau underutilization.\n"
+            )
+            explanation.append(
+                f"**ℹ️ UNDERUSE STATISTIK**: Penggunaan sangat di bawah pola umum (bukan pelanggaran). "
+                f"Bisa jadi kondisi lahan berbeda atau ada kendala akses pupuk.\n"
             )
     else:
         explanation.append(
@@ -126,7 +172,8 @@ def generate_human_explanation(
 
 def get_anomaly_explanation(
     id_petani: str,
-    df: pd.DataFrame
+    df: pd.DataFrame,
+    standards_manager = None  # Added standards_manager parameter
 ) -> Dict:
     """
     Main function untuk mendapatkan penjelasan lengkap anomaly
@@ -134,6 +181,7 @@ def get_anomaly_explanation(
     Args:
         id_petani: ID petani yang akan dijelaskan
         df: DataFrame lengkap dengan semua data (sudah ada hasil anomaly detection)
+        standards_manager: StandardsManager instance for concrete standard numbers
     
     Returns:
         Dict berisi explanation lengkap
@@ -164,7 +212,7 @@ def get_anomaly_explanation(
     # 5. Generate penjelasan
     petani_name = row_data.get('ID_Petani', id_petani)
     explanation_text = generate_human_explanation(
-        petani_name, komoditas, contributions, anomaly_label
+        petani_name, komoditas, contributions, anomaly_label, standards_manager  # Pass standards_manager
     )
     
     # 6. Buat result

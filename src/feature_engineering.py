@@ -32,6 +32,14 @@ def calculate_total_pupuk_per_ha(df):
             df_copy[f'{pupuk}_per_ha'] = df_copy[total_col] / df_copy[luas_col].replace(0, np.nan)
             df_copy[f'{pupuk}_per_ha'] = df_copy[f'{pupuk}_per_ha'].fillna(0)
     
+    if all(f'{p}_per_ha' in df_copy.columns for p in pupuk_types):
+        df_copy['Total_per_ha'] = (
+            df_copy['Urea_per_ha'] + 
+            df_copy['NPK_per_ha'] + 
+            df_copy['Organik_per_ha']
+        )
+        print(f"✓ Total_per_ha berhasil dibuat untuk visualisasi dashboard")
+    
     print(f"✓ Total pupuk per ha dihitung (Urea, NPK, Organik per ha)")
     return df_copy
 
