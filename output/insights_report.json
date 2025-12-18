@@ -1,0 +1,529 @@
+{
+  "descriptive_stats": {
+    "total_farmers": 2956,
+    "total_commodities": 6,
+    "total_villages": 12,
+    "land_area": {
+      "total_ha": 1924.51,
+      "mean_ha": 0.6510520974289581,
+      "median_ha": 0.5,
+      "min_ha": 0.04,
+      "max_ha": 2.0,
+      "std_ha": 0.43125890087756313
+    },
+    "total_urea": {
+      "total_kg": "458878",
+      "mean_kg": 155.2361299052774,
+      "median_kg": 125.0,
+      "std_kg": 109.96096089486734
+    },
+    "total_npk": {
+      "total_kg": "612687",
+      "mean_kg": 207.2689445196211,
+      "median_kg": 175.0,
+      "std_kg": 138.53352222990526
+    },
+    "total_organik": {
+      "total_kg": "635635",
+      "mean_kg": 215.03213802435724,
+      "median_kg": 0.0,
+      "std_kg": 409.19742584156074
+    },
+    "total_pupuk": {
+      "total_kg": "1707200",
+      "mean_kg": 577.5372124492558,
+      "median_kg": 330.0,
+      "std_kg": 549.0105645325989
+    },
+    "urea_per_ha": {
+      "mean": 234.31608008328024,
+      "median": 250.0,
+      "std": 52.54905962980596,
+      "min": 0.0,
+      "max": 375.0
+    },
+    "npk_per_ha": {
+      "mean": 320.1875547241901,
+      "median": 300.0,
+      "std": 60.70167036637926,
+      "min": 0.0,
+      "max": 860.0
+    },
+    "organik_per_ha": {
+      "mean": 240.95726206585474,
+      "median": 0.0,
+      "std": 425.14172762242697,
+      "min": 0.0,
+      "max": 1000.0
+    },
+    "total_per_ha": {
+      "mean": 795.4608968733252,
+      "median": 600.0,
+      "std": 420.0046880451373,
+      "min": 0.0,
+      "max": 1550.0
+    }
+  },
+  "anomaly_analysis": {
+    "distribution": {
+      "Normal": 2562,
+      "Anomali": 394
+    },
+    "percentages": {
+      "Normal": 86.67117726657646,
+      "Anomali": 13.328822733423545
+    },
+    "scores": {
+      "mean": 0.18585080872974613,
+      "median": 0.1005747753601873,
+      "std": 0.22496478830034325,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "score_Normal": {
+      "mean": 0.10954633164381442,
+      "median": 0.1005747753601873,
+      "count": "2562"
+    },
+    "score_Anomali": {
+      "mean": 0.6820235759737996,
+      "median": 0.6561450647580054,
+      "count": "394"
+    }
+  },
+  "clustering_analysis": {
+    "n_clusters": 10,
+    "distribution": {
+      "0": 918,
+      "1": 393,
+      "2": 463,
+      "3": 70,
+      "4": 11,
+      "5": 58,
+      "6": 180,
+      "7": 114,
+      "8": 553,
+      "9": 196
+    },
+    "percentages": {
+      "0": 31.055480378890394,
+      "1": 13.294993234100136,
+      "2": 15.663058186738837,
+      "3": 2.3680649526387008,
+      "4": 0.3721244925575102,
+      "5": 1.962110960757781,
+      "6": 6.089309878213803,
+      "7": 3.8565629228687412,
+      "8": 18.707713125845736,
+      "9": 6.630581867388363
+    },
+    "profiles": {
+      "0": {
+        "size": 918,
+        "percentage": 31.055480378890394,
+        "land_mean": 0.3460130718954248,
+        "land_median": 0.3,
+        "intensity_mean": 595.8482207697895,
+        "intensity_median": 600.0,
+        "Urea_per_ha_mean": 245.2846768336964,
+        "NPK_per_ha_mean": 350.563543936093,
+        "Organik_per_ha_mean": 0.0,
+        "anomaly_rate": 8.061002178649238,
+        "status_dist": {
+          "Normal": 912,
+          "Overuse": 6
+        }
+      },
+      "1": {
+        "size": 393,
+        "percentage": 13.294993234100136,
+        "land_mean": 1.0756997455470738,
+        "land_median": 1.0,
+        "intensity_mean": 1549.4900763358778,
+        "intensity_median": 1550.0,
+        "Urea_per_ha_mean": 249.99898218829517,
+        "NPK_per_ha_mean": 300.0,
+        "Organik_per_ha_mean": 999.4910941475827,
+        "anomaly_rate": 0.2544529262086514,
+        "status_dist": {
+          "Normal": 393
+        }
+      },
+      "2": {
+        "size": 463,
+        "percentage": 15.663058186738837,
+        "land_mean": 0.9376025917926566,
+        "land_median": 1.0,
+        "intensity_mean": 586.9448765101849,
+        "intensity_median": 598.6666666666666,
+        "Urea_per_ha_mean": 250.5206610356581,
+        "NPK_per_ha_mean": 325.8950578071401,
+        "Organik_per_ha_mean": 10.52915766738661,
+        "anomaly_rate": 12.526997840172784,
+        "status_dist": {
+          "Normal": 438,
+          "Overuse": 25
+        }
+      },
+      "3": {
+        "size": 70,
+        "percentage": 2.3680649526387008,
+        "land_mean": 0.3018571428571428,
+        "land_median": 0.2,
+        "intensity_mean": 193.75714285714287,
+        "intensity_median": 275.0,
+        "Urea_per_ha_mean": 57.047619047619044,
+        "NPK_per_ha_mean": 66.30952380952381,
+        "Organik_per_ha_mean": 70.4,
+        "anomaly_rate": 100.0,
+        "status_dist": {
+          "Normal": 70
+        }
+      },
+      "4": {
+        "size": 11,
+        "percentage": 0.3721244925575102,
+        "land_mean": 0.4318181818181818,
+        "land_median": 0.5,
+        "intensity_mean": 860.0,
+        "intensity_median": 860.0,
+        "Urea_per_ha_mean": 0.0,
+        "NPK_per_ha_mean": 860.0,
+        "Organik_per_ha_mean": 0.0,
+        "anomaly_rate": 100.0,
+        "status_dist": {
+          "Normal": 11
+        }
+      },
+      "5": {
+        "size": 58,
+        "percentage": 1.962110960757781,
+        "land_mean": 0.3355172413793104,
+        "land_median": 0.25,
+        "intensity_mean": 421.82758620689657,
+        "intensity_median": 400.0,
+        "Urea_per_ha_mean": 0.0,
+        "NPK_per_ha_mean": 421.82758620689657,
+        "Organik_per_ha_mean": 0.0,
+        "anomaly_rate": 100.0,
+        "status_dist": {
+          "Normal": 58
+        }
+      },
+      "6": {
+        "size": 180,
+        "percentage": 6.089309878213803,
+        "land_mean": 1.6877777777777778,
+        "land_median": 1.6,
+        "intensity_mean": 574.3055555555555,
+        "intensity_median": 600.0,
+        "Urea_per_ha_mean": 249.30555555555554,
+        "NPK_per_ha_mean": 325.0,
+        "Organik_per_ha_mean": 0.0,
+        "anomaly_rate": 0.5555555555555556,
+        "status_dist": {
+          "Normal": 180
+        }
+      },
+      "7": {
+        "size": 114,
+        "percentage": 3.8565629228687412,
+        "land_mean": 0.9535087719298246,
+        "land_median": 1.0,
+        "intensity_mean": 1446.3450292397658,
+        "intensity_median": 1450.0,
+        "Urea_per_ha_mean": 150.14619883040933,
+        "NPK_per_ha_mean": 299.12280701754383,
+        "Organik_per_ha_mean": 997.0760233918128,
+        "anomaly_rate": 100.0,
+        "status_dist": {
+          "Normal": 114
+        }
+      },
+      "8": {
+        "size": 553,
+        "percentage": 18.707713125845736,
+        "land_mean": 0.3515732368896926,
+        "land_median": 0.32,
+        "intensity_mean": 550.007233273056,
+        "intensity_median": 550.0,
+        "Urea_per_ha_mean": 250.00723327305604,
+        "NPK_per_ha_mean": 300.0,
+        "Organik_per_ha_mean": 0.0,
+        "anomaly_rate": 0.0,
+        "status_dist": {
+          "Normal": 551,
+          "Overuse": 2
+        }
+      },
+      "9": {
+        "size": 196,
+        "percentage": 6.630581867388363,
+        "land_mean": 0.4987244897959184,
+        "land_median": 0.5,
+        "intensity_mean": 1549.93537414966,
+        "intensity_median": 1550.0,
+        "Urea_per_ha_mean": 249.93537414965985,
+        "NPK_per_ha_mean": 300.0,
+        "Organik_per_ha_mean": 1000.0,
+        "anomaly_rate": 3.571428571428571,
+        "status_dist": {
+          "Normal": 196
+        }
+      }
+    },
+    "balance_score": 1.1982570806100217
+  },
+  "compliance_analysis": {
+    "overall": {
+      "Normal": 2923,
+      "Overuse": 33
+    },
+    "percentages": {
+      "Normal": 98.88362652232748,
+      "Overuse": 1.1163734776725303
+    },
+    "by_commodity": {
+      "JAGUNG": {
+        "total": 1285,
+        "distribution": {
+          "Normal": 1256,
+          "Overuse": 29
+        },
+        "percentages": {
+          "Normal": 97.7431906614786,
+          "Overuse": 2.2568093385214008
+        }
+      },
+      "PADI": {
+        "total": 1594,
+        "distribution": {
+          "Normal": 1590,
+          "Overuse": 4
+        },
+        "percentages": {
+          "Normal": 99.74905897114178,
+          "Overuse": 0.2509410288582183
+        }
+      },
+      "CABAI": {
+        "total": 48,
+        "distribution": {
+          "Normal": 48
+        },
+        "percentages": {
+          "Normal": 100.0
+        }
+      },
+      "BAWANG MERAH": {
+        "total": 10,
+        "distribution": {
+          "Normal": 10
+        },
+        "percentages": {
+          "Normal": 100.0
+        }
+      },
+      "KAKAO": {
+        "total": 8,
+        "distribution": {
+          "Normal": 8
+        },
+        "percentages": {
+          "Normal": 100.0
+        }
+      },
+      "KOPI": {
+        "total": 11,
+        "distribution": {
+          "Normal": 11
+        },
+        "percentages": {
+          "Normal": 100.0
+        }
+      }
+    },
+    "Urea_status": {
+      "distribution": {
+        "Normal": 2943,
+        "Overuse": 13
+      },
+      "overuse_rate": 0.4397834912043302,
+      "underuse_rate": 0.0,
+      "normal_rate": 99.56021650879568
+    },
+    "NPK_status": {
+      "distribution": {
+        "Normal": 2926,
+        "Overuse": 30
+      },
+      "overuse_rate": 1.0148849797023005,
+      "underuse_rate": 0.0,
+      "normal_rate": 98.9851150202977
+    },
+    "Organik_status": {
+      "distribution": {
+        "Normal": 2956
+      },
+      "overuse_rate": 0.0,
+      "underuse_rate": 0.0,
+      "normal_rate": 100.0
+    }
+  },
+  "priority_analysis": {
+    "distribution": {
+      "Rendah": 1945,
+      "Sedang": 918,
+      "Tinggi": 93
+    },
+    "percentages": {
+      "Rendah": 65.79837618403248,
+      "Sedang": 31.055480378890394,
+      "Tinggi": 3.1461434370771313
+    },
+    "top_actions": {
+      "Tidak ada tindakan diperlukan": 1945,
+      "Evaluasi efisiensi, kemungkinan boros": 702,
+      "Periksa pola pemupukan, ada ketidakwajaran": 300,
+      "URGENT: Investigasi segera! Cek validitas data dan pola pemupukan": 93,
+      "Sesuaikan dengan standar yang ditetapkan": 33,
+      "Pastikan nutrisi tanaman terpenuhi": 31,
+      "Cek kembali data luas lahan": 13
+    }
+  },
+  "commodity_analysis": {
+    "BAWANG MERAH": {
+      "count": 10,
+      "percentage": 0.3382949932341001,
+      "land_mean": 0.29,
+      "land_total": 2.9,
+      "intensity_mean": 526.6,
+      "intensity_median": 525.0,
+      "Urea_per_ha": 0.0,
+      "NPK_per_ha": 526.6,
+      "Organik_per_ha": 0.0,
+      "anomaly_rate": 100.0,
+      "status_dist": {
+        "Normal": 10
+      },
+      "overuse_rate": 0.0,
+      "underuse_rate": 0.0
+    },
+    "CABAI": {
+      "count": 48,
+      "percentage": 1.6238159675236805,
+      "land_mean": 0.34500000000000003,
+      "land_total": 16.560000000000002,
+      "intensity_mean": 400.0,
+      "intensity_median": 400.0,
+      "Urea_per_ha": 0.0,
+      "NPK_per_ha": 400.0,
+      "Organik_per_ha": 0.0,
+      "anomaly_rate": 100.0,
+      "status_dist": {
+        "Normal": 48
+      },
+      "overuse_rate": 0.0,
+      "underuse_rate": 0.0
+    },
+    "JAGUNG": {
+      "count": 1285,
+      "percentage": 43.470906630581865,
+      "land_mean": 0.548420233463035,
+      "land_total": 704.72,
+      "intensity_mean": 585.9474631876096,
+      "intensity_median": 600.0,
+      "Urea_per_ha": 240.55959411001754,
+      "NPK_per_ha": 341.594094758526,
+      "Organik_per_ha": 3.7937743190661477,
+      "anomaly_rate": 12.840466926070038,
+      "status_dist": {
+        "Normal": 1256,
+        "Overuse": 29
+      },
+      "overuse_rate": 2.2568093385214008,
+      "underuse_rate": 0.0
+    },
+    "KAKAO": {
+      "count": 8,
+      "percentage": 0.2706359945872801,
+      "land_mean": 0.46875,
+      "land_total": 3.75,
+      "intensity_mean": 636.0,
+      "intensity_median": 636.0,
+      "Urea_per_ha": 20.0,
+      "NPK_per_ha": 0.0,
+      "Organik_per_ha": 616.0,
+      "anomaly_rate": 100.0,
+      "status_dist": {
+        "Normal": 8
+      },
+      "overuse_rate": 0.0,
+      "underuse_rate": 0.0
+    },
+    "KOPI": {
+      "count": 11,
+      "percentage": 0.3721244925575102,
+      "land_mean": 0.4318181818181818,
+      "land_total": 4.75,
+      "intensity_mean": 860.0,
+      "intensity_median": 860.0,
+      "Urea_per_ha": 0.0,
+      "NPK_per_ha": 860.0,
+      "Organik_per_ha": 0.0,
+      "anomaly_rate": 100.0,
+      "status_dist": {
+        "Normal": 11
+      },
+      "overuse_rate": 0.0,
+      "underuse_rate": 0.0
+    },
+    "PADI": {
+      "count": 1594,
+      "percentage": 53.92422192151556,
+      "land_mean": 0.7476976160602258,
+      "land_total": 1191.83,
+      "intensity_mean": 978.3098625856151,
+      "intensity_median": 550.0,
+      "Urea_per_ha": 240.50141423764356,
+      "NPK_per_ha": 297.1141781681305,
+      "Organik_per_ha": 440.6942701798411,
+      "anomaly_rate": 9.535759096612297,
+      "status_dist": {
+        "Normal": 1590,
+        "Overuse": 4
+      },
+      "overuse_rate": 0.2509410288582183,
+      "underuse_rate": 0.0
+    }
+  },
+  "executive_summary": {
+    "timestamp": "2025-12-18 17:35:19",
+    "key_findings": [
+      {
+        "category": "System Health",
+        "finding": "Anomaly rate of 13.3%",
+        "severity": "medium",
+        "recommendation": "Regular monitoring sufficient"
+      },
+      {
+        "category": "Standards Compliance",
+        "finding": "Overuse: 1.1%, Underuse: 0.0%",
+        "severity": "medium",
+        "recommendation": "Focus on education and monitoring"
+      },
+      {
+        "category": "Action Priority",
+        "finding": "3.1% farmers require immediate action",
+        "severity": "low",
+        "recommendation": "Allocate resources for 3% of farmer base"
+      },
+      {
+        "category": "Farmer Segmentation",
+        "finding": "10 distinct farmer segments identified (balance: 1.2%)",
+        "severity": "low",
+        "recommendation": "Implement segment-specific strategies"
+      }
+    ]
+  }
+}
