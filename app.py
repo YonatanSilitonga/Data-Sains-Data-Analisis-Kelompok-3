@@ -2092,7 +2092,7 @@ elif page == "Tentang Model":
                             st.plotly_chart(fig, use_container_width=True)
         
         with tab3:
-            st.markdown("""
+            st.markdown(f"""
             <strong>Bagaimana Sistem Menghasilkan Rekomendasi?</strong>
             
             Rekomendasi dihasilkan dari kombinasi:
@@ -2105,7 +2105,7 @@ elif page == "Tentang Model":
             - 🚨 <strong>Tinggi</strong>: Anomali berat atau overuse sangat signifikan (>50% dari median)
             - ⚠️ <strong>Sedang</strong>: Anomali ringan atau overuse/underuse moderat (30-50%)
             - ✅ <strong>Rendah</strong>: Pola normal dengan sedikit penyimpangan (<30%)
-            """)
+            """, unsafe_allow_html=True)
             
             if 'Prioritas' in df.columns:
                 col1, col2 = st.columns(2)

@@ -17,7 +17,7 @@ models:
 standar_pupuk:
   BAWANG MERAH:
     NPK:
-      max: 350.0
+      max: 530.0
       min: 0.0
     Organik:
       max: 1000.0

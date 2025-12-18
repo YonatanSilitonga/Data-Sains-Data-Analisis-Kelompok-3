@@ -1868,9 +1868,9 @@ P1874,PATANE II,SAURDOT,PADI,1.0,Normal,Sedang,📊 Intensitas sangat tinggi: 15
 P1875,PATANE II,SAURDOT,PADI,1.0,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 1,"Evaluasi efisiensi, kemungkinan boros"
 P1876,PATANE II,SAURDOT,PADI,1.0,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 1,"Evaluasi efisiensi, kemungkinan boros"
 P1877,PATANE II,SAURDOT,PADI,1.0,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 1,"Evaluasi efisiensi, kemungkinan boros"
-P1878,PATANE II,SAURDOT,BAWANG MERAH,0.5,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
-P1879,PATANE II,SAURDOT,BAWANG MERAH,0.5,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
-P1880,PATANE II,SAURDOT,BAWANG MERAH,0.5,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
+P1878,PATANE II,SAURDOT,BAWANG MERAH,0.5,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
+P1879,PATANE II,SAURDOT,BAWANG MERAH,0.5,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
+P1880,PATANE II,SAURDOT,BAWANG MERAH,0.5,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
 P1881,PATANE I,SATAHI DESA PATANE I,JAGUNG,1.5,Normal,Rendah,🎯 Cluster 6,Tidak ada tindakan diperlukan
 P1882,PATANE I,SATAHI DESA PATANE I,JAGUNG,1.5,Normal,Rendah,🎯 Cluster 6,Tidak ada tindakan diperlukan
 P1883,PATANE I,SATAHI DESA PATANE I,JAGUNG,1.5,Normal,Rendah,🎯 Cluster 6,Tidak ada tindakan diperlukan
@@ -2754,10 +2754,10 @@ P2760,PATANE IV,MADUMA,PADI,0.5,Normal,Sedang,📊 Intensitas sangat tinggi: 155
 P2761,PATANE IV,MADUMA,PADI,0.5,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 9,"Evaluasi efisiensi, kemungkinan boros"
 P2762,PATANE IV,MADUMA,PADI,0.5,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 9,"Evaluasi efisiensi, kemungkinan boros"
 P2763,PATANE IV,MADUMA,PADI,1.0,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 1,"Evaluasi efisiensi, kemungkinan boros"
-P2764,PATANE IV,SIRAITURUK PASIR OK JAYA,BAWANG MERAH,0.1,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.85) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
-P2765,PATANE IV,SIRAITURUK PASIR OK JAYA,BAWANG MERAH,0.1,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.85) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
-P2766,PATANE IV,SIRAITURUK PASIR OK JAYA,BAWANG MERAH,0.5,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
-P2767,PATANE IV,SIRAITURUK PASIR OK JAYA,BAWANG MERAH,0.1,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.85) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
+P2764,PATANE IV,SIRAITURUK PASIR OK JAYA,BAWANG MERAH,0.1,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.85) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
+P2765,PATANE IV,SIRAITURUK PASIR OK JAYA,BAWANG MERAH,0.1,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.85) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
+P2766,PATANE IV,SIRAITURUK PASIR OK JAYA,BAWANG MERAH,0.5,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
+P2767,PATANE IV,SIRAITURUK PASIR OK JAYA,BAWANG MERAH,0.1,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.85) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
 P2768,PATANE IV,SIRAITURUK PASIR OK JAYA,JAGUNG,1.0,Normal,Rendah,🎯 Cluster 2,Tidak ada tindakan diperlukan
 P2769,PATANE IV,SIRAITURUK PASIR OK JAYA,JAGUNG,0.75,Normal,Sedang,⚠️ ANOMALI RINGAN: Pola perlu perhatian (ML Score: 0.32) | 🎯 Cluster 2,"Periksa pola pemupukan, ada ketidakwajaran"
 P2770,PATANE IV,SIRAITURUK PASIR OK JAYA,JAGUNG,0.75,Normal,Sedang,⚠️ ANOMALI RINGAN: Pola perlu perhatian (ML Score: 0.32) | 🎯 Cluster 2,"Periksa pola pemupukan, ada ketidakwajaran"
@@ -2919,9 +2919,9 @@ P2925,PATANE III,TANI SEJAHTRA,PADI,1.5,Normal,Sedang,📊 Intensitas sangat tin
 P2926,PATANE III,TANI SEJAHTRA,PADI,1.0,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 1,"Evaluasi efisiensi, kemungkinan boros"
 P2927,PATANE III,TANI SEJAHTRA,PADI,1.5,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 1,"Evaluasi efisiensi, kemungkinan boros"
 P2928,PATANE III,TANI SEJAHTRA,PADI,1.5,Normal,Sedang,📊 Intensitas sangat tinggi: 1550.0 kg/ha | 🎯 Cluster 1,"Evaluasi efisiensi, kemungkinan boros"
-P2929,PATANE III,TANAH LAPANG,BAWANG MERAH,0.25,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
-P2930,PATANE III,TANAH LAPANG,BAWANG MERAH,0.25,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
-P2931,PATANE III,TANAH LAPANG,BAWANG MERAH,0.1,Overuse,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.85) | ⚠️ Melebihi standar admin | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan; Sesuaikan dengan standar yang ditetapkan
+P2929,PATANE III,TANAH LAPANG,BAWANG MERAH,0.25,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
+P2930,PATANE III,TANAH LAPANG,BAWANG MERAH,0.25,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.84) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
+P2931,PATANE III,TANAH LAPANG,BAWANG MERAH,0.1,Normal,Tinggi,🚨 ANOMALI BERAT: Pola pupuk sangat tidak wajar (ML Score: 0.85) | 🎯 Cluster 5,URGENT: Investigasi segera! Cek validitas data dan pola pemupukan
 P2932,PATANE III,TANAH LAPANG,CABAI,0.25,Normal,Sedang,⚠️ ANOMALI RINGAN: Pola perlu perhatian (ML Score: 0.69) | 🎯 Cluster 5,"Periksa pola pemupukan, ada ketidakwajaran"
 P2933,PATANE III,TANAH LAPANG,CABAI,0.25,Normal,Sedang,⚠️ ANOMALI RINGAN: Pola perlu perhatian (ML Score: 0.69) | 🎯 Cluster 5,"Periksa pola pemupukan, ada ketidakwajaran"
 P2934,PATANE III,TANAH LAPANG,CABAI,0.25,Normal,Sedang,⚠️ ANOMALI RINGAN: Pola perlu perhatian (ML Score: 0.69) | 🎯 Cluster 5,"Periksa pola pemupukan, ada ketidakwajaran"
