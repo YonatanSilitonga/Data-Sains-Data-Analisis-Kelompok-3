@@ -1255,9 +1255,9 @@ elif page == "Prediksi Data Baru":
     <strong>Cara Menggunakan:</strong><br>
     1. Masukkan data petani baru di form di bawah<br>
     2. Sistem akan otomatis menghitung status (jika standar aktif)<br>
-    3. Rekomendasi akan diberikan berdasarkan analisis ML dan standar (jika aktif)
     </div>
     """, unsafe_allow_html=True)
+    # 3. Rekomendasi akan diberikan berdasarkan analisis ML dan standar (jika aktif)
     
     with st.form("prediction_form"):
         st.subheader("Data Petani Baru")
@@ -1647,10 +1647,10 @@ elif page == "Rekomendasi":
     Rekomendasi dihasilkan berdasarkan:<br>
     1. Deteksi anomali (ML)<br>
     2. Pola clustering<br>
-    3. Standar pupuk (jika aktif)<br>
-    4. Intensitas penggunaan per hektar
     </div>
     """, unsafe_allow_html=True)
+    # 3. Standar pupuk (jika aktif)<br>
+    # 4. Intensitas penggunaan per hektar
     
     # Summary by priority
     st.subheader("Ringkasan Prioritas")

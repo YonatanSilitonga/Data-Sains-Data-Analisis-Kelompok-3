@@ -508,11 +508,209 @@
 # if __name__ == "__main__":
 #     main()
 
-"""
-Model Evaluation Script - RDKK System
-Visualisasi disimpan dalam format PNG (tanpa HTML)
-Unsupervised Evaluation Only
-"""
+# """
+# Model Evaluation Script - RDKK System
+# Visualisasi disimpan dalam format PNG (tanpa HTML)
+# Unsupervised Evaluation Only
+# """
+
+# import pandas as pd
+# import numpy as np
+# import joblib
+# import json
+# from pathlib import Path
+
+# import matplotlib.pyplot as plt
+# from sklearn.decomposition import PCA
+# from sklearn.metrics import (
+#     silhouette_score,
+#     calinski_harabasz_score,
+#     davies_bouldin_score
+# )
+
+# # ======================================================
+# # GLOBAL CONFIG
+# # ======================================================
+# OUTPUT_DIR = Path("output/evaluation")
+# OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# plt.style.use("default")
+
+
+# # ======================================================
+# # UTIL
+# # ======================================================
+# def header(title):
+#     print("\n" + "=" * 70)
+#     print(title)
+#     print("=" * 70)
+
+
+# # ======================================================
+# # LOAD DATA & MODELS
+# # ======================================================
+# def load_all():
+#     header("LOADING DATA & MODELS")
+
+#     df = pd.read_csv("output/dataset_final.csv")
+#     print(f"✓ Dataset loaded: {df.shape}")
+
+#     with open("models/features.json") as f:
+#         feature_info = json.load(f)
+
+#     kmeans = joblib.load("models/kmeans.joblib")
+
+#     anomaly_bundle = joblib.load("models/anomaly_isolation_forest.pkl")
+
+#     return df, feature_info, kmeans, anomaly_bundle
+
+
+# # ======================================================
+# # CLUSTERING EVALUATION
+# # ======================================================
+# def evaluate_clustering(df, feature_info):
+#     header("CLUSTERING EVALUATION")
+
+#     feature_cols = feature_info["feature_cols"]
+#     X = df[feature_cols].fillna(0)
+#     labels = df["Cluster_ID"]
+
+#     silhouette = silhouette_score(X, labels)
+#     calinski = calinski_harabasz_score(X, labels)
+#     davies = davies_bouldin_score(X, labels)
+
+#     print(f"Silhouette Score       : {silhouette:.4f}")
+#     print(f"Calinski-Harabasz      : {calinski:.2f}")
+#     print(f"Davies-Bouldin Index   : {davies:.4f}")
+
+#     # -----------------------------
+#     # Cluster Distribution Plot
+#     # -----------------------------
+#     cluster_counts = labels.value_counts().sort_index()
+
+#     plt.figure(figsize=(7, 4))
+#     cluster_counts.plot(kind="bar")
+#     plt.title("Cluster Distribution")
+#     plt.xlabel("Cluster ID")
+#     plt.ylabel("Number of Farmers")
+#     plt.tight_layout()
+#     plt.savefig(OUTPUT_DIR / "cluster_distribution.png", dpi=300)
+#     plt.close()
+
+#     print("✓ Saved: cluster_distribution.png")
+
+#     # -----------------------------
+#     # PCA Scatter Plot
+#     # -----------------------------
+#     pca = PCA(n_components=2)
+#     X_pca = pca.fit_transform(X)
+
+#     plt.figure(figsize=(7, 5))
+#     scatter = plt.scatter(
+#         X_pca[:, 0],
+#         X_pca[:, 1],
+#         c=labels,
+#         s=10
+#     )
+#     plt.title("PCA Projection of Clusters")
+#     plt.xlabel("PC 1")
+#     plt.ylabel("PC 2")
+#     plt.colorbar(scatter, label="Cluster ID")
+#     plt.tight_layout()
+#     plt.savefig(OUTPUT_DIR / "cluster_pca.png", dpi=300)
+#     plt.close()
+
+#     print("✓ Saved: cluster_pca.png")
+
+#     return {
+#         "silhouette": silhouette,
+#         "calinski": calinski,
+#         "davies": davies,
+#     }
+
+
+# # ======================================================
+# # ANOMALY DETECTION EVALUATION
+# # ======================================================
+# def evaluate_anomaly(df):
+#     header("ANOMALY DETECTION EVALUATION")
+
+#     counts = df["Anomaly_Label"].value_counts()
+
+#     # -----------------------------
+#     # Anomaly Proportion
+#     # -----------------------------
+#     plt.figure(figsize=(6, 4))
+#     counts.plot(kind="bar")
+#     plt.title("Anomaly vs Normal Distribution")
+#     plt.xlabel("Label")
+#     plt.ylabel("Number of Farmers")
+#     plt.tight_layout()
+#     plt.savefig(OUTPUT_DIR / "anomaly_distribution.png", dpi=300)
+#     plt.close()
+
+#     print("✓ Saved: anomaly_distribution.png")
+
+#     # -----------------------------
+#     # Anomaly Score Histogram
+#     # -----------------------------
+#     plt.figure(figsize=(6, 4))
+#     plt.hist(df["Anomaly_Score"], bins=50)
+#     plt.title("Distribution of Anomaly Scores")
+#     plt.xlabel("Anomaly Score")
+#     plt.ylabel("Frequency")
+#     plt.tight_layout()
+#     plt.savefig(OUTPUT_DIR / "anomaly_score_histogram.png", dpi=300)
+#     plt.close()
+
+#     print("✓ Saved: anomaly_score_histogram.png")
+
+#     anomaly_rate = (df["Anomaly_Label"] != "Normal").mean() * 100
+#     print(f"Anomaly Rate: {anomaly_rate:.2f}%")
+
+#     return {"anomaly_rate": anomaly_rate}
+
+
+# # ======================================================
+# # STANDARDS EVALUATION
+# # ======================================================
+# def evaluate_standards(df):
+#     header("STANDARDS COMPLIANCE")
+
+#     counts = df["Final_Status"].value_counts()
+
+#     plt.figure(figsize=(6, 4))
+#     counts.plot(kind="bar")
+#     plt.title("Standards Compliance Status")
+#     plt.xlabel("Status")
+#     plt.ylabel("Number of Farmers")
+#     plt.tight_layout()
+#     plt.savefig(OUTPUT_DIR / "standards_compliance.png", dpi=300)
+#     plt.close()
+
+#     print("✓ Saved: standards_compliance.png")
+
+#     return {"distribution": counts.to_dict()}
+
+
+# # ======================================================
+# # MAIN
+# # ======================================================
+# def main():
+#     df, feature_info, _, _ = load_all()
+
+#     results = {}
+#     results["clustering"] = evaluate_clustering(df, feature_info)
+#     results["anomaly"] = evaluate_anomaly(df)
+#     results["standards"] = evaluate_standards(df)
+
+#     header("EVALUATION FINISHED")
+#     print("✓ All visualizations saved as PNG")
+#     print("✓ Safe for reports & documentation")
+
+
+# if __name__ == "__main__":
+#     main()
 
 import pandas as pd
 import numpy as np
@@ -522,6 +720,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 from sklearn.metrics import (
     silhouette_score,
     calinski_harabasz_score,
@@ -559,10 +758,97 @@ def load_all():
         feature_info = json.load(f)
 
     kmeans = joblib.load("models/kmeans.joblib")
-
     anomaly_bundle = joblib.load("models/anomaly_isolation_forest.pkl")
 
     return df, feature_info, kmeans, anomaly_bundle
+
+
+# ======================================================
+# ELBOW METHOD
+# ======================================================
+def plot_elbow(X, max_k=10):
+    inertias = []
+    K_range = range(2, max_k + 1)
+
+    for k in K_range:
+        km = KMeans(n_clusters=k, random_state=42, n_init=10)
+        km.fit(X)
+        inertias.append(km.inertia_)
+
+    plt.figure(figsize=(6, 4))
+    plt.plot(K_range, inertias, marker="o")
+    plt.xlabel("Number of Clusters (k)")
+    plt.ylabel("Inertia")
+    plt.title("Elbow Curve for KMeans")
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / "elbow_curve.png", dpi=300)
+    plt.close()
+
+    print("✓ Saved: elbow_curve.png")
+
+
+# ======================================================
+# CLUSTER CENTROID HEATMAP
+# ======================================================
+def plot_centroid_heatmap(df, feature_cols):
+    centroids = df.groupby("Cluster_ID")[feature_cols].mean()
+
+    plt.figure(figsize=(10, 5))
+    plt.imshow(centroids, aspect="auto")
+    plt.colorbar(label="Mean Feature Value")
+
+    plt.yticks(range(len(centroids)), centroids.index)
+    plt.xticks(range(len(feature_cols)), feature_cols, rotation=45, ha="right")
+
+    plt.title("Cluster Centroid Heatmap")
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / "cluster_centroid_heatmap.png", dpi=300)
+    plt.close()
+
+    print("✓ Saved: cluster_centroid_heatmap.png")
+
+
+# ======================================================
+# FEATURE BOXPLOT PER CLUSTER
+# ======================================================
+def plot_feature_boxplots(df, feature_cols, max_features=6):
+    selected_features = feature_cols[:max_features]
+
+    for feature in selected_features:
+        plt.figure(figsize=(6, 4))
+        df.boxplot(column=feature, by="Cluster_ID")
+        plt.title(f"Distribution of {feature} per Cluster")
+        plt.suptitle("")
+        plt.xlabel("Cluster ID")
+        plt.ylabel(feature)
+        plt.tight_layout()
+        plt.savefig(OUTPUT_DIR / f"boxplot_{feature}.png", dpi=300)
+        plt.close()
+
+        print(f"✓ Saved: boxplot_{feature}.png")
+
+
+# ======================================================
+# CLUSTER vs ANOMALY RELATION
+# ======================================================
+def plot_cluster_anomaly_relation(df):
+    crosstab = pd.crosstab(df["Cluster_ID"], df["Anomaly_Label"])
+
+    crosstab.plot(
+        kind="bar",
+        stacked=True,
+        figsize=(7, 4)
+    )
+
+    plt.title("Cluster vs Anomaly Distribution")
+    plt.xlabel("Cluster ID")
+    plt.ylabel("Number of Farmers")
+    plt.legend(title="Anomaly Label")
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / "cluster_anomaly_relation.png", dpi=300)
+    plt.close()
+
+    print("✓ Saved: cluster_anomaly_relation.png")
 
 
 # ======================================================
@@ -575,6 +861,9 @@ def evaluate_clustering(df, feature_info):
     X = df[feature_cols].fillna(0)
     labels = df["Cluster_ID"]
 
+    # -----------------------------
+    # Metrics
+    # -----------------------------
     silhouette = silhouette_score(X, labels)
     calinski = calinski_harabasz_score(X, labels)
     davies = davies_bouldin_score(X, labels)
@@ -584,11 +873,11 @@ def evaluate_clustering(df, feature_info):
     print(f"Davies-Bouldin Index   : {davies:.4f}")
 
     # -----------------------------
-    # Cluster Distribution Plot
+    # Cluster Distribution
     # -----------------------------
     cluster_counts = labels.value_counts().sort_index()
 
-    plt.figure(figsize=(7, 4))
+    plt.figure(figsize=(6, 4))
     cluster_counts.plot(kind="bar")
     plt.title("Cluster Distribution")
     plt.xlabel("Cluster ID")
@@ -600,27 +889,30 @@ def evaluate_clustering(df, feature_info):
     print("✓ Saved: cluster_distribution.png")
 
     # -----------------------------
-    # PCA Scatter Plot
+    # PCA Visualization
     # -----------------------------
     pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X)
 
     plt.figure(figsize=(7, 5))
-    scatter = plt.scatter(
-        X_pca[:, 0],
-        X_pca[:, 1],
-        c=labels,
-        s=10
-    )
-    plt.title("PCA Projection of Clusters")
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=labels, s=10)
     plt.xlabel("PC 1")
     plt.ylabel("PC 2")
-    plt.colorbar(scatter, label="Cluster ID")
+    plt.title("PCA Projection of Clusters")
+    plt.colorbar(label="Cluster ID")
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "cluster_pca.png", dpi=300)
     plt.close()
 
     print("✓ Saved: cluster_pca.png")
+
+    # -----------------------------
+    # Additional Visuals
+    # -----------------------------
+    plot_elbow(X)
+    plot_centroid_heatmap(df, feature_cols)
+    plot_feature_boxplots(df, feature_cols)
+    plot_cluster_anomaly_relation(df)
 
     return {
         "silhouette": silhouette,
@@ -637,9 +929,6 @@ def evaluate_anomaly(df):
 
     counts = df["Anomaly_Label"].value_counts()
 
-    # -----------------------------
-    # Anomaly Proportion
-    # -----------------------------
     plt.figure(figsize=(6, 4))
     counts.plot(kind="bar")
     plt.title("Anomaly vs Normal Distribution")
@@ -651,9 +940,6 @@ def evaluate_anomaly(df):
 
     print("✓ Saved: anomaly_distribution.png")
 
-    # -----------------------------
-    # Anomaly Score Histogram
-    # -----------------------------
     plt.figure(figsize=(6, 4))
     plt.hist(df["Anomaly_Score"], bins=50)
     plt.title("Distribution of Anomaly Scores")
@@ -705,8 +991,8 @@ def main():
     results["standards"] = evaluate_standards(df)
 
     header("EVALUATION FINISHED")
-    print("✓ All visualizations saved as PNG")
-    print("✓ Safe for reports & documentation")
+    print("✓ All alternative visualizations generated")
+    print("✓ Strong for modeling explanation & PPT")
 
 
 if __name__ == "__main__":
