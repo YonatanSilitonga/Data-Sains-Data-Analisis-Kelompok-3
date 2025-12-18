@@ -255,11 +255,12 @@ with st.sidebar:
         [
             "Dashboard Utama",
             "Data Explorer", 
+            "Kelola Standar",
             "Prediksi Data Baru",
             "Clustering & Pola",
             "Rekomendasi",
             "Tentang Model",
-            "Kelola Standar"
+            "Evaluasi Model"
         ],
         label_visibility="collapsed"
     )
@@ -285,7 +286,7 @@ with st.sidebar:
         st.warning("⚠️ Data belum tersedia\n\nJalankan pipeline:\n`python main.py`")
     
     st.markdown("---")
-    st.info("🔧 Version: 4.1.0\n📅 Updated: Dec 2025")
+    st.info("🔧 Version: 1.1.0\n📅 Updated: Dec 2025")
 
 # PAGE CONTENT CONTINUES HERE...
 # (All your existing page logic remains the same)
@@ -1454,7 +1455,7 @@ elif page == "Clustering & Pola":
     <strong>Apa itu Clustering? (Penjelasan Sederhana)</strong><br><br>
     
     Clustering adalah cara komputer mengelompokkan petani yang memiliki <strong>pola penggunaan pupuk serupa</strong>. 
-    Bayangkan seperti mengelompokkan siswa berdasarkan hobi mereka.<br><br>
+    Bayangkan seperti mengelompokkan siswa berdasarkan hobi mereka.<br>
     
     <strong>Poin Penting:</strong><br>
     <ul style="margin: 10px 0; padding-left: 20px;">
@@ -2534,11 +2535,344 @@ elif page == "Kelola Standar":
                 else:
                     st.error("❌ Gagal menghapus standar")
 
+# tambahan halaman untuk evaluasi model
+elif page == "Evaluasi Model":
+
+    st.markdown(
+        '<div class="section-header">Evaluasi Performa Model</div>',
+        unsafe_allow_html=True
+    )
+
+    if df is None or models is None or len(models) == 0:
+        st.error("❌ Data atau model tidak tersedia")
+        st.stop()
+
+    st.markdown(
+        """
+        <div class="info-box">
+        <strong>Halaman Evaluasi Model:</strong><br>
+        Halaman ini menampilkan metrik evaluasi performa model Machine Learning
+        yang digunakan dalam sistem RDKK.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Tabs for different evaluations
+    eval_tab1, eval_tab2, eval_tab3 = st.tabs([
+        "📊 Clustering Evaluation",
+        "🔍 Anomaly Detection Evaluation",
+        "✅ Standards Compliance"
+    ])
+
+    # ======================================================
+    # TAB 1 — CLUSTERING EVALUATION
+    # ======================================================
+    with eval_tab1:
+        st.markdown("### Clustering Model Evaluation")
+
+        if 'Cluster_ID' in df.columns and 'clustering' in models:
+            feature_cols = models['clustering']['feature_cols']
+            available_features = [f for f in feature_cols if f in df.columns]
+
+            if len(available_features) >= 2:
+                X = df[available_features].fillna(0)
+                labels = df['Cluster_ID'].values
+
+                from sklearn.metrics import (
+                    silhouette_score,
+                    calinski_harabasz_score,
+                    davies_bouldin_score
+                )
+
+                silhouette = silhouette_score(X, labels)
+                calinski = calinski_harabasz_score(X, labels)
+                davies = davies_bouldin_score(X, labels)
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.metric(
+                        "Silhouette Score",
+                        f"{silhouette:.4f}",
+                        help="Range: -1 to 1. >0.5 = good clustering"
+                    )
+
+                    if silhouette > 0.7:
+                        st.success("Excellent clustering quality")
+                    elif silhouette > 0.5:
+                        st.success("Good clustering quality")
+                    elif silhouette > 0.25:
+                        st.warning("Fair clustering quality")
+                    else:
+                        st.error("Poor clustering quality")
+
+                with col2:
+                    st.metric(
+                        "Calinski-Harabasz",
+                        f"{calinski:.2f}",
+                        help="Higher is better. Measures cluster separation"
+                    )
+
+                with col3:
+                    st.metric(
+                        "Davies-Bouldin",
+                        f"{davies:.4f}",
+                        help="Lower is better. <1.0 = good clustering"
+                    )
+
+                    if davies < 0.5:
+                        st.success("Excellent separation")
+                    elif davies < 1.0:
+                        st.success("Good separation")
+                    elif davies < 1.5:
+                        st.warning("Fair separation")
+                    else:
+                        st.error("Poor separation")
+
+                st.markdown("---")
+                st.markdown("### 🧠 Interpretasi Hasil Clustering")
+
+                st.markdown(
+                    """
+                    <div class="info-box">
+                    <strong>Ringkasan Evaluasi Clustering:</strong><br><br>
+
+                    <b>1️⃣ Silhouette Score (0.3422 — Fair)</b><br>
+                    Nilai ini menunjukkan bahwa model mampu membentuk cluster yang
+                    <i>cukup terpisah</i>, namun masih terdapat tumpang tindih antar cluster.
+                    Kondisi ini <b>wajar</b> pada data pertanian karena pola penggunaan pupuk
+                    bersifat <u>kontinu</u> dan tidak memiliki batas tegas antar kelompok petani.<br><br>
+
+                    <b>2️⃣ Calinski–Harabasz Index (33.217.69 — Tinggi)</b><br>
+                    Nilai yang tinggi mengindikasikan bahwa secara keseluruhan struktur cluster
+                    yang terbentuk <b>stabil dan tidak acak</b>. Artinya, pembagian kelompok
+                    petani memiliki dasar statistik yang kuat meskipun variasi internal masih ada.<br><br>
+
+                    <b>3️⃣ Davies–Bouldin Index (1.9162 — Poor Separation)</b><br>
+                    Nilai ini menunjukkan bahwa beberapa cluster memiliki karakteristik
+                    yang saling berdekatan. Hal ini mencerminkan kondisi nyata di lapangan,
+                    di mana banyak petani memiliki pola pemupukan yang mirip dan berada
+                    di area transisi antar cluster.<br><br>
+
+                    <strong>📌 Kesimpulan:</strong><br>
+                    Model clustering pada proyek ini digunakan untuk <b>segmentasi eksploratif</b>,
+                    bukan klasifikasi kaku. Hasil evaluasi menunjukkan bahwa model cukup
+                    efektif untuk mengelompokkan petani berdasarkan pola penggunaan pupuk
+                    dan mendukung analisis anomali serta penentuan prioritas pengawasan.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+
+                st.markdown("---")
+                st.markdown("#### Cluster Distribution")
+
+                cluster_counts = df['Cluster_ID'].value_counts().sort_index()
+
+                fig = px.bar(
+                    x=cluster_counts.index,
+                    y=cluster_counts.values,
+                    labels={
+                        'x': 'Cluster ID',
+                        'y': 'Number of Farmers'
+                    },
+                    title='Distribution of Farmers Across Clusters'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+                balance = (cluster_counts.min() / cluster_counts.max()) * 100
+                st.metric("Cluster Balance Score", f"{balance:.1f}%")
+                
+                with st.expander("📘 Interpretasi Hasil Clustering"):
+                    st.markdown(
+                        """
+                        **Cluster Balance Score** menunjukkan seberapa merata distribusi
+                        petani pada setiap cluster.
+
+                        - Nilai mendekati **100%** → cluster seimbang  
+                        - Nilai rendah → terdapat dominasi cluster mayoritas  
+
+                        Pada proyek ini, ketidakseimbangan cluster menunjukkan bahwa
+                        sebagian besar petani memiliki pola penggunaan pupuk yang serupa,
+                        sedangkan sebagian kecil petani memiliki karakteristik pemupukan
+                        yang unik atau ekstrem.
+
+                        Hal ini tidak dianggap sebagai kesalahan model, melainkan
+                        mencerminkan kondisi nyata di lapangan dan mendukung tujuan
+                        sistem RDKK dalam mengidentifikasi kelompok prioritas pengawasan.
+                        """
+                    )
+
+                if balance > 50:
+                    st.success("✓ Well-balanced clusters")
+                elif balance > 30:
+                    st.warning("⚠️ Moderately balanced")
+                else:
+                    st.error("⚠️ Imbalanced clusters")
+
+                st.markdown("---")
+                st.markdown("#### 2D Visualization (PCA)")
+
+                from sklearn.decomposition import PCA
+
+                pca = PCA(n_components=2)
+                X_pca = pca.fit_transform(X)
+
+                viz_df = pd.DataFrame({
+                    'PC1': X_pca[:, 0],
+                    'PC2': X_pca[:, 1],
+                    'Cluster': df['Cluster_ID'].astype(str)
+                })
+
+                fig = px.scatter(
+                    viz_df,
+                    x='PC1',
+                    y='PC2',
+                    color='Cluster',
+                    title=(
+                        f'PCA Visualization '
+                        f'(Explained Variance: {pca.explained_variance_ratio_.sum()*100:.1f}%)'
+                    )
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+    # ======================================================
+    # TAB 2 — ANOMALY DETECTION
+    # ======================================================
+    with eval_tab2:
+        st.markdown("### Anomaly Detection Evaluation")
+
+        if 'Anomaly_Label' in df.columns:
+            col1, col2 = st.columns(2)
+
+            with col1:
+                anomaly_counts = df['Anomaly_Label'].value_counts()
+
+                fig = px.pie(
+                    values=anomaly_counts.values,
+                    names=anomaly_counts.index,
+                    title='Anomaly Distribution'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                total_anomalies = len(df) - anomaly_counts.get('Normal', 0)
+                anomaly_rate = total_anomalies / len(df) * 100
+
+                st.metric("Total Farmers", f"{len(df):,}")
+                st.metric("Anomalies Detected", f"{total_anomalies:,}")
+                st.metric("Anomaly Rate", f"{anomaly_rate:.1f}%")
+
+                if anomaly_rate < 20:
+                    st.success("✓ Reasonable anomaly rate")
+                elif anomaly_rate < 40:
+                    st.warning("⚠️ High anomaly rate")
+                else:
+                    st.error("⚠️ Very high anomaly rate")
+
+        if 'Anomaly_Score' in df.columns:
+            st.markdown("---")
+            st.markdown("#### Anomaly Score Distribution")
+
+            fig = px.histogram(
+                df,
+                x='Anomaly_Score',
+                color='Anomaly_Label',
+                nbins=50,
+                title='Distribution of Anomaly Scores by Category'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                st.metric("Mean Score", f"{df['Anomaly_Score'].mean():.4f}")
+            with col2:
+                st.metric("Median Score", f"{df['Anomaly_Score'].median():.4f}")
+            with col3:
+                st.metric("Std Dev", f"{df['Anomaly_Score'].std():.4f}")
+            with col4:
+                st.metric("Min Score", f"{df['Anomaly_Score'].min():.4f}")
+
+    # ======================================================
+    # TAB 3 — STANDARDS COMPLIANCE
+    # ======================================================
+    with eval_tab3:
+        st.markdown("### Standards Compliance Evaluation")
+
+        if 'Final_Status' in df.columns:
+            col1, col2 = st.columns(2)
+
+            with col1:
+                status_counts = df['Final_Status'].value_counts()
+
+                fig = px.pie(
+                    values=status_counts.values,
+                    names=status_counts.index,
+                    title='Overall Standards Compliance',
+                    color=status_counts.index,
+                    color_discrete_map={
+                        'Normal': '#4caf50',
+                        'Underuse': '#ff9800',
+                        'Overuse': '#f44336'
+                    }
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("#### Summary Statistics")
+
+                for status in ['Normal', 'Underuse', 'Overuse']:
+                    if status in status_counts.index:
+                        count = status_counts[status]
+                        pct = count / len(df) * 100
+
+                        emoji = (
+                            "✅" if status == 'Normal'
+                            else "🟡" if status == 'Underuse'
+                            else "🔴"
+                        )
+                        st.metric(
+                            f"{emoji} {status}",
+                            f"{count:,}",
+                            f"{pct:.1f}%"
+                        )
+
+            if 'Komoditas' in df.columns:
+                st.markdown("---")
+                st.markdown("#### Compliance by Commodity")
+
+                compliance_data = (
+                    df.groupby(['Komoditas', 'Final_Status'])
+                    .size()
+                    .reset_index(name='Count')
+                )
+
+                fig = px.bar(
+                    compliance_data,
+                    x='Komoditas',
+                    y='Count',
+                    color='Final_Status',
+                    title='Standards Compliance by Commodity',
+                    color_discrete_map={
+                        'Normal': '#4caf50',
+                        'Underuse': '#ff9800',
+                        'Overuse': '#f44336'
+                    }
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info(
+                "ℹ️ Standards compliance evaluation requires standards to be enabled"
+            )
+
 # Footer
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 2rem 0;">
-    <p><strong>RDKK System v4.1</strong> | Powered by Machine Learning & Data Science</p>
+    <p><strong>RDKK System v1.1</strong> | Powered by Machine Learning & Data Science</p>
     <p>© 2025 - Sistem Analisis Pupuk Subsidi</p>
     <p style="font-size: 0.9rem; margin-top: 1rem;">
         🌾 Membantu petani mengoptimalkan penggunaan pupuk untuk hasil panen yang lebih baik

@@ -1,7 +1,0 @@
-RINGKASAN REKOMENDASI RDKK
-==================================================
-
-Total Petani: 2956
-Prioritas Tinggi: 124
-Prioritas Sedang: 2333
-Prioritas Rendah: 499
